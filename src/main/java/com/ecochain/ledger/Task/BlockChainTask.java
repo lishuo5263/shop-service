@@ -48,7 +48,7 @@ public class BlockChainTask {
          * 3.取data字段中每个调用区块链接口存入的bussType 进行业务判断后，调用自身系统相对应的接口方法同步数据
          */
        logger.info(">>>>>>>>>>>>> Scheduled  Execute Interface ServiceName:   " +serviceName +" ServicePort:  " +servicePort);
-        String getToDayBlockInfo = HttpTool.doPost("http://192.168.200.85:8332/GetDataList", "100");
+        String getToDayBlockInfo = HttpTool.doPost("http://192.168.200.81:8332/GetDataList", "100");
         JSONObject toDayBlockInfo = JSONObject.parseObject(getToDayBlockInfo);
           for (int i = toDayBlockInfo.getJSONArray("result").size()-1;i>=0;i--) {
             JSONObject resultInfo = (JSONObject) toDayBlockInfo.getJSONArray("result").get(i);
