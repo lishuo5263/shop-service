@@ -774,12 +774,9 @@
 	    and a.user_id = #{user_id}
 	    and b.state = '3'
   </update>
-  <update id="updateOrderHashByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
+  <update id="updateOrderStatusByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
     update shop_order_info 
     <set >
-      <if test="trade_hash != null" >
-        trade_hash =  #{trade_hash} ,
-      </if>
       <if test="order_status != null" >
         order_status = #{order_status}
       </if>
@@ -800,5 +797,14 @@
   </update>
   <update id="unLockOrderByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
      update shop_order_info set is_lock = '0' where order_no = #{order_no}
+  </update>
+  <update id="updateStatusByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
+    update shop_order_info 
+    set order_status = #{order_status},
+    pay_time = #{pay_time}
+    WHERE order_no  in
+    <foreach collection="shopOrderList" index="index" item="item" open="(" separator="," close=")">  
+          #{item}   
+    </foreach> 
   </update>
 </mapper>

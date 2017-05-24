@@ -1454,32 +1454,22 @@ public class ShopOrderInfoWebService extends BaseWebService {
             }
 
             PageData userWallet = userWalletService.getWalletByUserId(String.valueOf(user.get("id")), Constant.VERSION_NO);
-            String future_currency = String.valueOf(userWallet.get("future_currency"));
-            if (new BigDecimal(String.valueOf(shopOrderInfo.get("order_amount"))).compareTo(new BigDecimal(future_currency)) > 0) {
+            String hlb_amnt = String.valueOf(userWallet.get("hlb_amnt"));
+            if (new BigDecimal(String.valueOf(shopOrderInfo.get("order_amount"))).compareTo(new BigDecimal(hlb_amnt)) > 0) {
                 ar.setSuccess(false);
-                ar.setMessage("积分余额不足，请充值");
+                ar.setMessage("您的合链币余额不足，请使用钱包兑换！");
                 ar.setErrorCode(CodeConstant.BALANCE_NOT_ENOUGH);
                 return ar;
             }
             pd.put("order_no", shopOrderInfo.getString("order_no"));
             pd.put("order_id", String.valueOf(shopOrderInfo.get("order_id")));
+            pd.put("shop_order_id", String.valueOf(shopOrderInfo.get("order_id")));
             pd.put("order_amount", shopOrderInfo.get("order_amount"));
             pd.put("mobile_phone", user.getString("mobile_phone"));
 
             pd.put("shop_order_no", shopOrderInfo.getString("order_no"));
 
             //商品表里有供应商有专门价格无需查询兑换费率
-           /* String  rate = "";
-            List<PageData> codeList =sysGenCodeService.findByGroupCode("LIMIT_RATE", Constant.VERSION_NO);
-            for(PageData code:codeList){
-                if("EXCHANGE_RATE".equals(code.get("code_name"))){
-                    rate = code.get("code_value").toString();
-                }
-            }
-            if(StringUtil.isEmpty(rate)){
-
-            }
-            pd.put("rate", rate);*/
             //锁定订单
             boolean lockOrderByOrderNo = shopOrderInfoService.lockOrderByOrderNo(pd);
             logger.info("支付订单锁定结果lockOrderByOrderNo："+lockOrderByOrderNo);
@@ -1487,7 +1477,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
             boolean payNow = shopOrderInfoService.payNow(pd, Constant.VERSION_NO);
             if (payNow) {
                 ar.setSuccess(true);
-                ar.setMessage("交易处理中...请前往账单查看兑换结果");
+                ar.setMessage("交易处理中...请前往账单查看支付结果");
                 data.put("order_no", pd.getString("order_no"));
                 data.put("order_amount", shopOrderInfo.get("order_amount"));
                 data.put("pay_time", DateUtil.getCurrDateTime());

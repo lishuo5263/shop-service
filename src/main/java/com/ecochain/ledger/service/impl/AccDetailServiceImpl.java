@@ -116,15 +116,15 @@ public class AccDetailServiceImpl implements AccDetailService {
     public boolean updatePayByHash(PageData pd, String versionNo) throws Exception {
         //修改订单状态为已支付
         PageData shopOrder = new PageData();
-        shopOrder.put("hashList", pd.get("hashList"));
+        shopOrder.put("shopOrderList", pd.get("shopOrderList"));
         shopOrder.put("order_status", "2");
         shopOrder.put("pay_time", DateUtil.getCurrDateTime());
-        if(shopOrderInfoService.updateShopOrderStatusByHash(shopOrder, versionNo)){
+        if(shopOrderInfoService.updateStatusByOrderNo(shopOrder, versionNo)){
             //修改订单商品关联表状态为已支付
             PageData shopOrderGoods = new PageData();
-            shopOrderGoods.put("hashList", pd.get("hashList"));
+            shopOrderGoods.put("shopOrderList", pd.get("shopOrderList"));
             shopOrderGoods.put("state", "2");
-            if(shopOrderGoodsService.updateOrderGoodsStatusByHash(shopOrderGoods, versionNo)){
+            if(shopOrderGoodsService.updateOrderGoodsStatusByOrderNo(shopOrderGoods, versionNo)){
                 PageData accDetail = new PageData();
                 accDetail.put("caldate", DateUtil.getCurrDateTime());
                 accDetail.put("cntflag", "1");
@@ -132,6 +132,7 @@ public class AccDetailServiceImpl implements AccDetailService {
                 accDetail.put("hashList", pd.get("hashList"));
                 boolean updateCntflagByHash = updateCntflagByHash(accDetail, versionNo);
                 logger.error("--------定时器商城支付-------AccDetailService.updateCntflagByHash------更新账户统计标志和状态");
+                return updateCntflagByHash;
             }else{
                 logger.error("--------定时器商城支付-------shopOrderGoodsService.updateOrderGoodsStatus------更新商城订单商品关联表状态  失败");
             }
@@ -139,7 +140,7 @@ public class AccDetailServiceImpl implements AccDetailService {
             logger.error("--------定时器商城支付-------updateShopOrderStatus------更新商城订单状态 失败");
         }
         
-        return true;
+        return false;
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpUtil;
 import com.ecochain.ledger.util.StringUtil;
 import com.github.pagehelper.PageHelper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -239,7 +241,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         }*/
 
         logger.info("====================测试代码========start================");
-        String jsonStr = HttpUtil.sendPostData("http://192.168.200.81:8332/get_new_key", "");
+        String jsonStr = HttpUtil.sendPostData("http://192.168.200.83:8332/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
         keyPd.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
@@ -247,13 +249,13 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
         System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
         //2. 获取公钥签名
-        String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_for_sign", JSON.toJSONString(keyPd));
+        String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.83:8332/send_data_for_sign", JSON.toJSONString(keyPd));
         JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
         Map<String, Object> paramentMap =new HashMap<String, Object>();
         paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
         paramentMap.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
         paramentMap.put("sign",signJsonObj.getString("result"));
-        String result1 = HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
+        String result1 = HttpUtil.sendPostData("http://192.168.200.83:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
         JSONObject json = JSON.parseObject(result1);
         if(StringUtil.isNotEmpty(json.getString("result"))){
             shopOrderGoods.get(0).setTradeHash(json.getString("result"));
@@ -493,7 +495,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             pd.put("logistics_hash",json.getString("result"));
         }*/
        /* logger.info("====================测试代码========start================");
-        String jsonStr = HttpUtil.sendPostData("http://192.168.200.81:8332/get_new_key", "");
+        String jsonStr = HttpUtil.sendPostData("http://192.168.200.83:8332/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
         keyPd.put("data",Base64.getBase64((pd.toString())));
@@ -501,13 +503,13 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
         System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
         //2. 获取公钥签名
-        String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_for_sign", JSON.toJSONString(keyPd));
+        String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.83:8332/send_data_for_sign", JSON.toJSONString(keyPd));
         JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
         Map<String, Object> paramentMap =new HashMap<String, Object>();
         paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
         paramentMap.put("data",Base64.getBase64((pd.toString())));
         paramentMap.put("sign",signJsonObj.getString("result"));
-        String result1 = HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
+        String result1 = HttpUtil.sendPostData("http://192.168.200.83:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
         JSONObject json = JSON.parseObject(result1);
         if(StringUtil.isNotEmpty(json.getString("result"))){
             pd.put("logistics_hash",json.getString("result"));
@@ -527,7 +529,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("-------------商城支付-----------start------------");
         pd.put("bussType", "payNow");//添加业务类型
         //从账户余额扣钱到冻结余额中
-        if(userWalletService.payNowBySJT(pd, Constant.VERSION_NO)){
+        if(userWalletService.payNowByHLB(pd, Constant.VERSION_NO)){
             /*//修改订单状态为已支付
             PageData shopOrder = new PageData();
             shopOrder.put("user_id", pd.get("user_id"));
@@ -551,8 +553,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             accDetail.put("user_type", pd.getString("user_type"));
             accDetail.put("acc_no", "05");
             pd.put("acc_no", "05");//进区块链
-            accDetail.put("wlbi_amnt", String.valueOf(pd.get("order_amount")));
-            accDetail.put("future_currency", String.valueOf(pd.get("order_amount")));//区块链保存数据用
+            accDetail.put("coin_amnt", String.valueOf(pd.get("order_amount")));
+            pd.put("coin_amnt", String.valueOf(pd.get("order_amount")));//区块链保存数据用
             accDetail.put("user_type", pd.getString("user_type"));
             /*accDetail.put("caldate", DateUtil.getCurrDateTime());
             accDetail.put("cntflag", "1");
@@ -561,8 +563,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             pd.put("status", "6");//进区块链
             accDetail.put("otherno", pd.getString("order_no"));
             accDetail.put("other_amnt", String.valueOf(pd.get("order_amount")));
-            accDetail.put("other_source", "商城兑换");
-            pd.put("other_source", "商城兑换");//进区块链
+            accDetail.put("other_source", "商城支付");
+            pd.put("other_source", "商城支付");//进区块链
             accDetail.put("operator", pd.getString("operator"));
             String good_name = shopOrderGoodsService.getOneGoodsNameByOrderNo(pd.getString("shop_order_no"));
             accDetail.put("remark1", good_name);
@@ -582,7 +584,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             logger.info("====================生产掉动态库代码=======end=================");*/
             
             logger.info("====================测试代码========start================");
-            String jsonStr = HttpUtil.sendPostData("http://192.168.200.81:8332/get_new_key", "");
+            String jsonStr = HttpUtil.sendPostData("http://192.168.200.83:8332/get_new_key", "");
             JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
             PageData keyPd = new PageData();
             keyPd.put("data",Base64.getBase64((JSON.toJSONString(pd))));
@@ -590,13 +592,13 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
             System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
             //2. 获取公钥签名
-            String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_for_sign",JSON.toJSONString(keyPd));
+            String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.83:8332/send_data_for_sign",JSON.toJSONString(keyPd));
             JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
             Map<String, Object> paramentMap =new HashMap<String, Object>();
             paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
             paramentMap.put("data",Base64.getBase64((JSON.toJSONString(pd))));
             paramentMap.put("sign",signJsonObj.getString("result"));
-            String result = HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
+            String result = HttpUtil.sendPostData("http://192.168.200.83:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
             JSONObject json = JSON.parseObject(result);
             if(StringUtil.isNotEmpty(json.getString("result"))){
                 accDetail.put("hash", json.getString("result")); 
@@ -612,9 +614,11 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             
             PageData tshopOrder = new PageData();
             tshopOrder.put("order_no", pd.getString("order_no"));
-            tshopOrder.put("trade_hash", pd.getString("trade_hash"));
+//            tshopOrder.put("trade_hash", pd.getString("trade_hash"));
             tshopOrder.put("order_status", "10");//支付处理中
-            boolean updateOrderHashResult = updateOrderHashByOrderNo(tshopOrder);
+            pd.put("order_status","2");//进区块链,订单状态
+            pd.put("state","2");//进区块链，订单商品关联表状态
+            boolean updateOrderHashResult = updateOrderStatusByOrderNo(tshopOrder);
             logger.info("--------商城兑换订单更新hash值---------updateOrderHashResult结果："+updateOrderHashResult);
             //解锁订单
             boolean unLockOrderByOrderNo = unLockOrderByOrderNo(pd);
@@ -941,8 +945,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     }
 
     @Override
-    public boolean updateOrderHashByOrderNo(PageData pd) throws Exception {
-        return (Integer)dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateOrderHashByOrderNo", pd)>0;
+    public boolean updateOrderStatusByOrderNo(PageData pd) throws Exception {
+        return (Integer)dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateOrderStatusByOrderNo", pd)>0;
     }
 
     /**
@@ -955,5 +959,10 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     @Override
     public String queryOrderNum(String orderNum) {
         return this.shopOrderInfoMapper.queryOrderNum(orderNum);
+    }
+    
+    @Override
+    public boolean updateStatusByOrderNo(PageData pd, String versionNo) throws Exception {
+        return (Integer)dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStatusByOrderNo", pd)>0;
     }
 }

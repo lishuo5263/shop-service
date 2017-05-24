@@ -43,6 +43,7 @@ public class AccHashSummaryTask {
 	    logger.debug("---------------------------------------------定时器hash账户汇总------start------"+DateUtil.getCurrDateTime()+"---------------------------------------");
 	    try {
 	        List<String> tradeHashlist = new ArrayList<String>();
+	        List<String> shopOrderList = new ArrayList<String>();
 //            List<String> rechargeHashlist = new ArrayList<String>();
             List<PageData> hashList = accDetailService.getHashList(null, Constant.VERSION_NO);
             
@@ -61,8 +62,9 @@ public class AccHashSummaryTask {
                 JSONObject jsonObject = JSONObject.parseObject(jsonStr);
                 String result = jsonObject.getString("result");
                 if(StringUtil.isNotEmpty(result)){//生成区块成功
-                    if("05".equals(hashMap.getString("acc_no"))){//商城兑换
+                    if("05".equals(hashMap.getString("acc_no"))){//商城支付
                         tradeHashlist.add(hashMap.getString("hash"));
+                        shopOrderList.add(hashMap.getString("otherno"));
                     }
                     
                     /*else if("06".equals(hashMap.getString("acc_no"))){//积分充值
@@ -73,6 +75,7 @@ public class AccHashSummaryTask {
             if(tradeHashlist != null && tradeHashlist.size() > 0){//商城兑换
                 PageData pd = new PageData();
                 pd.put("hashList", tradeHashlist);
+                pd.put("shopOrderList", shopOrderList);
                 boolean updatePayByHash = accDetailService.updatePayByHash(pd, Constant.VERSION_NO);
                 logger.info("------------------------------定时器hash账户汇总修改统计标志updatePayByHash:"+updatePayByHash);
             }

@@ -244,4 +244,13 @@
           #{item}   
     </foreach> 
   </update>
+  
+  <update id="updateOrderGoodsStatusByOrderNo" parameterType="com.ecochain.ledger.model.Page">
+    update shop_order_goods a set a.state = #{state} 
+    where 1=1
+    and a.shop_order_no in
+    <foreach collection="shopOrderList" index="index" item="item" open="(" separator="," close=")">  
+          #{item}   
+    </foreach> 
+  </update>
 </mapper>

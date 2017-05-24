@@ -165,7 +165,7 @@
   <select id="getWalletByUserId" resultType="com.ecochain.ledger.model.PageData" parameterType="java.lang.String">
 <!--     select * from user_wallet where user_id = #{user_id} -->
 	select  user_id,future_currency,future_treasure,ROUND(money,2)money,sanrelarmb_amnt,
-	        last_caldate,froze_rmb_amnt,froze_wlbao_amnt,froze_wlbi_amnt 
+	        last_caldate,froze_rmb_amnt,froze_wlbao_amnt,froze_wlbi_amnt ,hlb_amnt,froze_hlb_amnt
 	from user_wallet 
 	where user_id = #{user_id}
   </select>
@@ -514,5 +514,14 @@
     and b.`status` = '2'
     and b.confirm_time is NULL
     and a.froze_rmb_amnt &gt;= b.txamnt
+  </update>
+  <!--商城支付扣除合链币 -->
+  <update id="payNowByHLB" parameterType="com.ecochain.ledger.model.PageData">
+    update user_wallet
+    set hlb_amnt = hlb_amnt - #{order_amount},
+        froze_hlb_amnt = froze_hlb_amnt + #{order_amount}
+    where 1=1
+    and user_id = #{user_id}
+    and hlb_amnt &gt;= #{order_amount}
   </update>
 </mapper>

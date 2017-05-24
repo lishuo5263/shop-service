@@ -335,4 +335,9 @@ public class UserWalletServiceImpl implements UserWalletService {
     public boolean withDrawalAddMoney() throws Exception {
         return (Integer)dao.update("UserWalletMapper.withDrawalAddMoney", null)>0;
     }
+
+    @Override
+    public boolean payNowByHLB(PageData pd, String versionNo) throws Exception {
+        return (Integer)dao.update("UserWalletMapper.payNowByHLB", pd)>0;//用户扣钱
+    }
 }

@@ -262,5 +262,15 @@ public interface UserWalletService {
      * @return: boolean
      */
     boolean withDrawalAddMoney()throws Exception;
+    /**
+     * @describe:通过合链币支付
+     * @author: zhangchunming
+     * @date: 2017年5月24日上午11:48:45
+     * @param pd
+     * @param versionNo
+     * @throws Exception
+     * @return: boolean
+     */
+    boolean payNowByHLB(PageData pd ,String versionNo) throws Exception;
     /******************************************提现模块**************end******************************************/
 }

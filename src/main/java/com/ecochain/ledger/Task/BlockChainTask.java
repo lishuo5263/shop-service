@@ -1,6 +1,5 @@
 package com.ecochain.ledger.Task;
 
-import com.ecochain.ledger.model.BlockDataHash;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,12 +9,12 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.ecochain.ledger.model.BlockDataHash;
 import com.ecochain.ledger.model.PageData;
 import com.ecochain.ledger.service.BlockDataHashService;
 import com.ecochain.ledger.service.ShopOrderInfoService;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.HttpTool;
-import com.ecochain.ledger.util.HttpUtil;
 import com.ecochain.ledger.util.StringUtil;
 
 /**
@@ -48,7 +47,7 @@ public class BlockChainTask {
          * 3.取data字段中每个调用区块链接口存入的bussType 进行业务判断后，调用自身系统相对应的接口方法同步数据
          */
        logger.info(">>>>>>>>>>>>> Scheduled  Execute Interface ServiceName:   " +serviceName +" ServicePort:  " +servicePort);
-        String getToDayBlockInfo = HttpTool.doPost("http://192.168.200.81:8332/GetDataList", "100");
+        String getToDayBlockInfo = HttpTool.doPost("http://192.168.200.85:8332/GetDataList", "100");
         JSONObject toDayBlockInfo = JSONObject.parseObject(getToDayBlockInfo);
           for (int i = toDayBlockInfo.getJSONArray("result").size()-1;i>=0;i--) {
             JSONObject resultInfo = (JSONObject) toDayBlockInfo.getJSONArray("result").get(i);
@@ -67,16 +66,20 @@ public class BlockChainTask {
                 blockDataHash.setDataHash(resultInfo.getString("hash"));
                 blockDataHash.setBussType(data.getString("bussType"));
                 if(blockDataHashService.isExistDataHash(hash) < 1){
-                    if("insertOrder".equals(data.getString("bussType"))){
+                    /*if("insertOrder".equals(data.getString("bussType"))){
                         HttpTool.doPost("http://localhost:"+servicePort+"/"+serviceName+"/api/rest/shopOrder/insertShopOrder", data.toJSONString());
                         this.blockDataHashService.insert(blockDataHash);
-                    }else if("deliverGoods".equals(data.getString("bussType"))){
+                    }*/
+                    
+                    if("deliverGoods".equals(data.getString("bussType"))){
                         HttpTool.doGet("http://localhost:"+servicePort+"/"+serviceName+"/deliverGoods?shop_order_no="+data.getString("shop_order_no") +"&goods_id="+data.getString("goods_id") +"&logistics_no="+data.getString("logistics_no") +"&logistics_name="+data.getString("logistics_name") +"");
                         this.blockDataHashService.insert(blockDataHash);
-                    }else if("payNow".equals(data.getString("bussType"))){
+                    }
+                    
+                    /*if("payNow".equals(data.getString("bussType"))){
                         HttpUtil.postJson("http://localhost:"+servicePort+"/"+serviceName+"/api/rest/shopOrder/payNow", JSON.toJSONString(data));
                         this.blockDataHashService.insert(blockDataHash);
-                    }
+                    }*/
                     
                 }
             }

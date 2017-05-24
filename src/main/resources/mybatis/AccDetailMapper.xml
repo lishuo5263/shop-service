@@ -92,6 +92,18 @@
       <if test="hash != null" >
         hash,
       </if>
+      <if test="coin_name != null" >
+        coin_name,
+      </if>
+      <if test="coin_rate != null" >
+        coin_rate,
+      </if>
+      <if test="coin_amnt != null" >
+        coin_amnt,
+      </if>
+      <if test="buy_in_out != null" >
+        buy_in_out,
+      </if>
       <if test="remark1 != null" >
         remark1,
       </if>
@@ -166,6 +178,18 @@
       </if>
       <if test="hash != null" >
         #{hash},
+      </if>
+      <if test="coin_name != null" >
+        #{coin_name},
+      </if>
+      <if test="coin_rate != null" >
+        #{coin_rate},
+      </if>
+      <if test="coin_amnt != null" >
+        #{coin_amnt},
+      </if>
+      <if test="buy_in_out != null" >
+        #{buy_in_out},
       </if>
       <if test="remark1 != null" >
         #{remark1},
@@ -614,7 +638,7 @@
     </select>
     
     <select id="getHashList" parameterType="com.ecochain.ledger.model.PageData" resultType="com.ecochain.ledger.model.PageData">
-        select `hash`,acc_no from acc_detail where `status` = '5' and cntflag = '0'
+        select `hash`,acc_no,otherno from acc_detail where `status` = '5' and cntflag = '0'
     </select>
     <update id="updateCntflagByHash" parameterType="com.ecochain.ledger.model.PageData">
         update acc_detail 

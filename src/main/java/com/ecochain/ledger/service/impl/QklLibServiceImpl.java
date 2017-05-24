@@ -3,8 +3,10 @@ package com.ecochain.ledger.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.constants.Constant;
@@ -197,6 +199,35 @@ public class QklLibServiceImpl implements QklLibService {
           public void InitCrypt();
           public void StopCrypt();
   }
-    
+    public static void main(String[] args) {
+        PageData data = new PageData();
+        data.put("a", "测试");
+//       logger.info("====================测试代码========start================");
+        try { 
+            
+                String jsonStr = HttpUtil.sendPostData("http://192.168.200.81:8332/get_new_key", "");
+                JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
+                PageData keyPd = new PageData();
+                keyPd.put("data",Base64.getBase64((JSON.toJSONString(data))));
+                keyPd.put("publicKey",keyJsonObj.getJSONObject("result").getString("publicKey"));
+                keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
+                System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
+                //2. 获取公钥签名
+           
+                String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_for_sign",JSON.toJSONString(keyPd));
+                JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
+                Map<String, Object> paramentMap =new HashMap<String, Object>();
+                paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
+                paramentMap.put("data",Base64.getBase64((JSON.toJSONString(data))));
+                paramentMap.put("sign",signJsonObj.getString("result"));
+                String result = HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
+                JSONObject json = JSON.parseObject(result);
+                if(StringUtil.isNotEmpty(json.getString("result"))){
+                    System.out.println("result="+result);
+                }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     
 }
