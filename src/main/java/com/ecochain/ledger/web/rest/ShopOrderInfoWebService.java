@@ -1462,6 +1462,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
                 return ar;
             }
             pd.put("order_no", shopOrderInfo.getString("order_no"));
+            pd.put("shop_order_no", shopOrderInfo.getString("order_no"));
             pd.put("order_id", String.valueOf(shopOrderInfo.get("order_id")));
             pd.put("shop_order_id", String.valueOf(shopOrderInfo.get("order_id")));
             pd.put("order_amount", shopOrderInfo.get("order_amount"));

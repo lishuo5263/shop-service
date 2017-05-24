@@ -581,7 +581,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             pd.put("create_time", DateUtil.getCurrDateTime());//进区块链
             pd.put("order_status", "2");//进区块链
             pd.put("pay_time", DateUtil.getCurrDateTime());//进区块链
-            
+            pd.put("order_status","2");//进区块链,订单状态
+            pd.put("state","2");//进区块链，订单商品关联表状态
             
             /*logger.info("====================生产掉动态库代码========start================");
             String seedsStr = pd.getString("seeds");
@@ -633,8 +634,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             tshopOrder.put("order_no", pd.getString("order_no"));
 //            tshopOrder.put("trade_hash", pd.getString("trade_hash"));
             tshopOrder.put("order_status", "10");//支付处理中
-            pd.put("order_status","2");//进区块链,订单状态
-            pd.put("state","2");//进区块链，订单商品关联表状态
+            
             boolean updateOrderHashResult = updateOrderStatusByOrderNo(tshopOrder);
             logger.info("--------商城兑换订单更新hash值---------updateOrderHashResult结果："+updateOrderHashResult);
             //解锁订单
