@@ -533,7 +533,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     public boolean payNow(PageData pd, String versionNo) throws Exception {
         
         logger.info("-------------商城支付-----------start------------");
-        pd.put("bussTyte", "payNow");//添加业务类型
+        pd.put("bussType", "payNow");//添加业务类型
         //从账户余额扣钱到冻结余额中
         if(userWalletService.payNowBySJT(pd, Constant.VERSION_NO)){
             /*//修改订单状态为已支付
@@ -566,7 +566,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             accDetail.put("cntflag", "1");
             accDetail.put("status", "4");*/
             accDetail.put("status", "5");//5-审核中，6-成功，7失败
-            pd.put("status", "5");//进区块链
+            pd.put("status", "6");//进区块链
             accDetail.put("otherno", pd.getString("order_no"));
             accDetail.put("other_amnt", String.valueOf(pd.get("order_amount")));
             accDetail.put("other_source", "商城兑换");
@@ -578,6 +578,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             accDetail.put("create_time", DateUtil.getCurrDateTime());
             pd.put("create_time", DateUtil.getCurrDateTime());//进区块链
             pd.put("order_status", "2");//进区块链
+            pd.put("pay_time", DateUtil.getCurrDateTime());//进区块链
             
             
             /*logger.info("====================生产掉动态库代码========start================");

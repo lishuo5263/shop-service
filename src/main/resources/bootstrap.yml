@@ -1,5 +1,5 @@
 server:
-    contextPath: /wallet-service
+    contextPath: /shop-service
 
 management:
   context-path: /admin
