@@ -196,7 +196,7 @@
     and shop_order_id = #{shop_order_id,jdbcType=VARCHAR}
     and goods_id = #{goods_id}
   </update>
-  <select id="getOrderGoods" parameterType="com.ecochain.ledger.model.Page" resultType="com.ecochain.ledger.model.PageData">
+  <select id="getOrderGoods" parameterType="com.ecochain.ledger.model.PageData" resultType="com.ecochain.ledger.model.PageData">
     select * from shop_order_goods 
     where 1=1
     and shop_order_no = #{shop_order_no}

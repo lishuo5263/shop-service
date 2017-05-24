@@ -60,6 +60,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     private PayOrderService payOrderService;
     @Autowired
     private QklLibService qklLibService;
+    @Autowired
+    private SysGenCodeService sysGenCodeService;
 
     @Override
     public boolean updateOrderRefundStatus(String orderNo) {
@@ -211,7 +213,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             result.add(map);
             return result;
         }
-        Integer usersType = this.usersDetailsMapper.selectUserType(shopOrderGoods.get(0).getUserId());
+       /* Integer usersType = this.usersDetailsMapper.selectUserType(shopOrderGoods.get(0).getUserId());
         if (usersType == 0 || usersType == null) { //userType  1-普通会员 2-创业会员
             map.put("ErrorInsertByUsersType", "订单生成失败，usersType参数为空无法确定购买价格！");
             result.add(map);
@@ -221,7 +223,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             map.put("ErrorInsertNotAllowByUsersType", "订单生成失败，用户类型只能为普通会员和创业会员，商品无法购买！");
             result.add(map);
             return result;
-        }
+        }*/
         /*if(Integer.valueOf(shopOrderGoods.get(0).getIsPromote()) ==1){
             if(usersType > 1){ //1以上类型的用户不可下单
                 map.put("ErrorInsertNotAllowByUsersType","抱歉，当前账户没有购买此商品的权限，只有普通才能购买哦！");
@@ -237,9 +239,15 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
                 return result;q
             }
         }*/
-
+        String kql_url =null;
+        List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+        for(PageData mapObj:codeList){
+            if("QKL_URL".equals(mapObj.get("code_name"))){
+                kql_url = mapObj.get("code_value").toString();
+            }
+        }
         logger.info("====================测试代码========start================");
-        String jsonStr = HttpUtil.sendPostData("http://192.168.200.81:8332/get_new_key", "");
+        String jsonStr = HttpUtil.sendPostData(""+ kql_url+"/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
         keyPd.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
@@ -247,13 +255,13 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
         System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
         //2. 获取公钥签名
-        String signJsonObjStr =HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_for_sign", JSON.toJSONString(keyPd));
+        String signJsonObjStr =HttpUtil.sendPostData(""+ kql_url+"/send_data_for_sign", JSON.toJSONString(keyPd));
         JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
         Map<String, Object> paramentMap =new HashMap<String, Object>();
         paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
         paramentMap.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
         paramentMap.put("sign",signJsonObj.getString("result"));
-        String result1 = HttpUtil.sendPostData("http://192.168.200.81:8332/send_data_to_sys", JSON.toJSONString(paramentMap));
+        String result1 = HttpUtil.sendPostData(""+ kql_url+"/send_data_to_sys", JSON.toJSONString(paramentMap));
         JSONObject json = JSON.parseObject(result1);
         if(StringUtil.isNotEmpty(json.getString("result"))){
             shopOrderGoods.get(0).setTradeHash(json.getString("result"));
