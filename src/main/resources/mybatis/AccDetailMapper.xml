@@ -287,19 +287,16 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="listPageAcc" parameterType="com.ecochain.ledger.model.PageData" resultType="com.ecochain.ledger.model.PageData">
-  select otherno,caldate,acc_type,acc_name,wlbi_amnt,wlbao_amnt,rmb_amnt,remark1,currency from 
+  select otherno,caldate,acc_type,acc_name,rmb_amnt,coin_name,coin_rate,coin_amnt,buy_in_out,remark1 from 
 	 ( 
-	   select a.otherno,substring(a.create_time,1,19)caldate,b.acc_type,b.acc_name,
-	      case when a.wlbi_amnt &gt;0 and b.derection = '1'  then CONCAT('+',round(a.wlbi_amnt,2)) when a.wlbi_amnt = 0 or a.wlbi_amnt is null THEN'0' ELSE CONCAT('-',round(a.wlbi_amnt,2))   END as wlbi_amnt,
-          case when a.wlbao_amnt &gt;0 and b.derection = '1' then CONCAT('+',a.wlbao_amnt) when a.wlbao_amnt  = 0 or a.wlbao_amnt is null THEN '0'  ELSE  CONCAT('-',a.wlbao_amnt)  END as wlbao_amnt,
-          case when a.rmb_amnt &gt;0 and b.derection = '1' then CONCAT('+',round(a.rmb_amnt,2)) when a.rmb_amnt  = 0 or a.rmb_amnt is null THEN '0'  ELSE CONCAT('-',round(a.rmb_amnt,2))  END as rmb_amnt,
-	      a.remark1,
-	      case when a.wlbi_amnt &lt;&gt; 0 then '1' when a.wlbao_amnt &lt;&gt; 0 then '2' when a.rmb_amnt &lt;&gt; 0 then '3'  end currency
+	   select a.otherno,substring(a.create_time,1,19)caldate,b.acc_type,b.acc_name,a.coin_name,a.coin_rate,a.buy_in_out,
+          case when a.rmb_amnt &gt;0 and (a.buy_in_out = 2 or b.derection = '1') then CONCAT('+',round(a.rmb_amnt,2)) when a.rmb_amnt  = 0 or a.rmb_amnt is null THEN '0'  ELSE CONCAT('-',round(a.rmb_amnt,2))  END as rmb_amnt,
+          case when a.coin_amnt &gt;0 and a.buy_in_out = 1 then CONCAT('+',round(a.coin_amnt,2)) when a.coin_amnt  = 0 or a.coin_amnt is null THEN '0'  ELSE CONCAT('-',round(a.coin_amnt,2))  END as coin_amnt,
+          case when a.buy_in_out = 1 then CONCAT(a.remark1,'RMB-HLB') when a.buy_in_out = 2 then CONCAT(a.remark1,'HLB-RMB') else a.remark1 END remark1
         from acc_detail a,acc_def b
         where 1=1
         and a.user_id = #{user_id}
         and a.acc_no = b.acc_no
-        and a.`status` = '4'
     <if test="startTime != null and startTime != ''" >
       and   a.create_time &gt;= #{startTime}
     </if>
@@ -332,18 +329,6 @@
     </if>
     <if test="search_date == 'month'" >
       and   a.create_time between date_sub(now(),interval 1 month) and now()
-    </if>
-    <if test="currency == 1" >
-      and   a.wlbi_amnt &lt;&gt; 0
-    </if>
-    <if test="currency == 2" >
-      and   a.wlbao_amnt &lt;&gt; 0
-    </if>
-    <if test="currency == 3" >
-      and   a.rmb_amnt &lt;&gt; 0
-    </if>
-    <if test="currency == null or currency == '' or currency == 0 " >
-      and   (a.wlbi_amnt &lt;&gt; 0 or   a.wlbao_amnt &lt;&gt; 0 or   a.rmb_amnt &lt;&gt; 0 )
     </if>
     <if test="remark1 != null and remark1 != ''" >
       and   a.remark1 like  concat('%', #{remark1}, '%')  

@@ -16,6 +16,7 @@ import com.ecochain.ledger.service.ShopOrderGoodsService;
 import com.ecochain.ledger.service.ShopOrderInfoService;
 import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.Logger;
+import com.github.pagehelper.PageHelper;
 @Component("accDetailService")
 public class AccDetailServiceImpl implements AccDetailService {
     
@@ -179,6 +180,15 @@ public class AccDetailServiceImpl implements AccDetailService {
     @Override
     public boolean accDetailHashSummary(PageData pd, String versionNo) throws Exception {
         return (Integer)dao.update("AccDetailMapper.accDetailHashSummary", pd)>0;
+    }
+
+    @Override
+    public List<PageData> listPageAcc(PageData pd) throws Exception {
+        if (pd.getPage() != null && pd.getRows() != null) {
+            PageHelper.startPage(pd.getPage(), pd.getRows());
+        }
+        List<PageData> list = (List<PageData>)dao.findForList("AccDetailMapper.listPageAcc", pd);
+        return list;
     }
 
 }

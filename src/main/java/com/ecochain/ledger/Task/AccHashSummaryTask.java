@@ -23,7 +23,7 @@ import com.ecochain.ledger.util.StringUtil;
  * @描述：定时账户汇总
  */
 @Component
-@EnableScheduling
+//@EnableScheduling
 public class AccHashSummaryTask {
     private Logger logger = Logger.getLogger(AccHashSummaryTask.class);
 	@Autowired
