@@ -1,4 +1,4 @@
-package com.ecochain.ledger.rest;
+package com.ecochain.ledger.web.rest;
 
 import com.ecochain.ledger.model.R8ExChangeDTO;
 import com.ecochain.ledger.util.JedisUtil;

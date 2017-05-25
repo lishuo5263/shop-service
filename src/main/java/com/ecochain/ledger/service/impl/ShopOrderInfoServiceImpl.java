@@ -639,9 +639,6 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             }
             logger.info("====================测试代码=======end=================");
             
-            
-            
-            
             boolean accDetailResult = accDetailService.insertSelective(accDetail, Constant.VERSION_NO);
             logger.info("--------商城兑换插入账户流水---------accDetailResult结果："+accDetailResult);
             

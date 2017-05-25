@@ -1,9 +1,9 @@
 package com.ecochain.ledger.service;
 
+import java.util.List;
+
 import com.ecochain.ledger.model.Page;
 import com.ecochain.ledger.model.PageData;
-
-import java.util.List;
 
 public interface AccDetailService {
     boolean insertSelective(PageData pd,String versionNo) throws Exception;
@@ -162,4 +162,13 @@ public interface AccDetailService {
      * @return: boolean
      */
     boolean accDetailHashSummary(PageData pd,String versionNo) throws Exception;
+    /**
+     * @describe:分页查询账户流水
+     * @author: zhangchunming
+     * @date: 2017年5月24日下午7:58:05
+     * @param pd
+     * @throws Exception
+     * @return: PageData
+     */
+    List<PageData> listPageAcc(PageData pd) throws Exception;
 }
