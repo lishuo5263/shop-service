@@ -25,7 +25,7 @@ import com.ecochain.ledger.util.StringUtil;
  * Created by Lisandro on 2017/5/17.
  */
 @Component
-//@EnableScheduling
+@EnableScheduling
 public class BlockChainTask {
     
     private Logger logger = Logger.getLogger(BlockChainTask.class);
