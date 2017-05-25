@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tk.mybatis.mapper.util.StringUtil;
+
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.annotation.LoginVerify;
 import com.ecochain.ledger.base.BaseWebService;
@@ -72,7 +74,8 @@ public class AccWebService extends BaseWebService{
     @PostMapping("/listPageAcc")
     @ApiOperation(nickname = "账户流水", value = "账户流水", notes = "账户流水")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String")
+        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "page", value = "当前页", required = false, paramType = "query", dataType = "String")
     })
     public AjaxResponse listPageAcc(HttpServletRequest request){
         AjaxResponse ar = new AjaxResponse();
@@ -302,6 +305,51 @@ public class AccWebService extends BaseWebService{
         }   
         return ar;
     }
+    
+    /**
+     * @describe:查询账户详情
+     * @author: zhangchunming
+     * @date: 2017年5月25日下午4:06:48
+     * @param request
+     * @param response
+     * @return: AjaxResponse
+     */
+    @LoginVerify
+    @PostMapping("/getAccDetail")
+    @ApiOperation(nickname = "查询账户详情", value = "查询账户详情", notes = "查询账户详情")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "id", value = "账单id", required = true, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getAccDetail(HttpServletRequest request,HttpServletResponse response){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String,Object>();
+        try {
+            String userstr = SessionUtil.getAttibuteForUser(RequestUtils.getRequestValue(CookieConstant.CSESSIONID, request));
+            JSONObject user = JSONObject.parseObject(userstr);
+            PageData pd = this.getPageData();
+            if(StringUtil.isEmpty(pd.getString("id"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setSuccess(false);
+                ar.setMessage("请输入账单id");
+                return ar;
+            }
+            pd.put("user_id", user.get("id"));
+            PageData accDetail = accDetailService.getAccDetail(pd);
+            data.put("accDetail", accDetail);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
+    }
+    
+    
     /**
      * @describe:转账
      * @author: zhangchunming

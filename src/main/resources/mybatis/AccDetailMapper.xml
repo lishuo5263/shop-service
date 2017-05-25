@@ -287,15 +287,16 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="listPageAcc" parameterType="com.ecochain.ledger.model.PageData" resultType="com.ecochain.ledger.model.PageData">
-  select otherno,caldate,acc_type,acc_name,rmb_amnt,coin_name,coin_rate,coin_amnt,buy_in_out,remark1 from 
+  select otherno,caldate,acc_type,acc_name,rmb_amnt,coin_name,coin_rate,coin_amnt,buy_in_out,remark1,create_time,id,hash from 
 	 ( 
-	   select a.otherno,substring(a.create_time,1,19)caldate,b.acc_type,b.acc_name,a.coin_name,a.coin_rate,a.buy_in_out,
+	   select a.id,a.otherno,substring(a.create_time,1,19)caldate,b.acc_type,b.acc_name,a.coin_name,a.coin_rate,a.buy_in_out,unix_timestamp(a.create_time)create_time,hash,
           case when a.rmb_amnt &gt;0 and (a.buy_in_out = 2 or b.derection = '1') then CONCAT('+',round(a.rmb_amnt,2)) when a.rmb_amnt  = 0 or a.rmb_amnt is null THEN '0'  ELSE CONCAT('-',round(a.rmb_amnt,2))  END as rmb_amnt,
           case when a.coin_amnt &gt;0 and a.buy_in_out = 1 then CONCAT('+',round(a.coin_amnt,2)) when a.coin_amnt  = 0 or a.coin_amnt is null THEN '0'  ELSE CONCAT('-',round(a.coin_amnt,2))  END as coin_amnt,
-          case when a.buy_in_out = 1 then CONCAT(a.remark1,'RMB-HLB') when a.buy_in_out = 2 then CONCAT(a.remark1,'HLB-RMB') else a.remark1 END remark1
+          case when a.buy_in_out = 1 then CONCAT(a.remark1,'RMB-HLB') when a.buy_in_out = 2 then CONCAT(a.remark1,'HLB-RMB') else a.remark1 END remark1,
+          case when a.user_id = #{user_id} then a.remark3 when a.rela_user_id = #{user_id} then a.remark2 else a.remark3 end other_account 
         from acc_detail a,acc_def b
         where 1=1
-        and a.user_id = #{user_id}
+        and (a.user_id = #{user_id} or a.rela_user_id = #{user_id})
         and a.acc_no = b.acc_no
     <if test="startTime != null and startTime != ''" >
       and   a.create_time &gt;= #{startTime}
@@ -648,4 +649,16 @@
         set w.future_currency = w.future_currency+ ifnull(d.smwlbi,0)
         where w.user_id = d.user_id
   </update>
+  
+  <select id="getAccDetail" parameterType="com.ecochain.ledger.model.PageData" resultType="com.ecochain.ledger.model.PageData">
+    select a.id,a.otherno,substring(a.create_time,1,19)caldate,b.acc_type,b.acc_name,a.coin_name,a.coin_rate,a.buy_in_out,unix_timestamp(a.create_time)create_time,hash,
+          case when a.rmb_amnt &gt;0 and (a.buy_in_out = 2 or b.derection = '1') then CONCAT('+',round(a.rmb_amnt,2)) when a.rmb_amnt  = 0 or a.rmb_amnt is null THEN '0'  ELSE CONCAT('-',round(a.rmb_amnt,2))  END as rmb_amnt,
+          case when a.coin_amnt &gt;0 and a.buy_in_out = 1 then CONCAT('+',round(a.coin_amnt,2)) when a.coin_amnt  = 0 or a.coin_amnt is null THEN '0'  ELSE CONCAT('-',round(a.coin_amnt,2))  END as coin_amnt,
+          case when a.buy_in_out = 1 then CONCAT(a.remark1,'RMB-HLB') when a.buy_in_out = 2 then CONCAT(a.remark1,'HLB-RMB') else a.remark1 END remark1 ,
+          case when a.user_id = #{user_id} then a.remark3 when a.rela_user_id = #{user_id} then a.remark2 else a.remark3 end other_account 
+    from acc_detail a ,acc_def b
+    where 1=1
+    and a.acc_no = b.acc_no
+    and a.id = #{id}
+  </select>
 </mapper>

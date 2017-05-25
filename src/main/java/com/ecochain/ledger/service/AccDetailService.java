@@ -171,4 +171,13 @@ public interface AccDetailService {
      * @return: PageData
      */
     List<PageData> listPageAcc(PageData pd) throws Exception;
+    /**
+     * @describe:根据账单id查询详情
+     * @author: zhangchunming
+     * @date: 2017年5月25日下午4:07:47
+     * @param pd
+     * @throws Exception
+     * @return: PageData
+     */
+    PageData getAccDetail(PageData pd) throws Exception;
 }

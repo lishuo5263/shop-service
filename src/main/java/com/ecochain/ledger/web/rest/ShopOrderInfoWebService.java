@@ -887,7 +887,8 @@ public class ShopOrderInfoWebService extends BaseWebService {
     @PostMapping("/listPageShopOrder")
     @ApiOperation(nickname = "查询订单列表", value = "查询订单列表", notes = "查询订单列表！")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String")
+        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "page", value = "当前页", required = false, paramType = "query", dataType = "String")
     })
     public AjaxResponse listPageShopOrder(HttpServletRequest request) {
         AjaxResponse ar = new AjaxResponse();
