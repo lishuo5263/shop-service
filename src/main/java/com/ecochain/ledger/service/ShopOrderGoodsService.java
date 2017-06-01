@@ -93,4 +93,14 @@ public interface ShopOrderGoodsService {
      * @return: boolean
      */
     boolean updateOrderGoodsStatusByOrderNo(PageData pd,String versionNo) throws Exception;
+    
+    /**
+     * @describe:查询供应商信息
+     * @author: zhangchunming
+     * @date: 2017年5月31日下午7:34:03
+     * @param shop_order_no
+     * @throws Exception
+     * @return: PageData
+     */
+    PageData getSupplierInfoByOrderNo(String shop_order_no) throws Exception;
  }

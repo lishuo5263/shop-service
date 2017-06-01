@@ -203,7 +203,7 @@
     and goods_id = #{goods_id}
   </select>
     <!--更新订单商品关联表状态 -->
-  <update id="updateOrderGoodsStatus" parameterType="com.ecochain.ledger.model.Page">
+  <update id="updateOrderGoodsStatus" parameterType="com.ecochain.ledger.model.PageData">
     update shop_order_goods
     set `state` = #{state}
     where 1=1
@@ -215,7 +215,7 @@
   <select id="queryGoodsByCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
   select count(1) from shop_order_goods where user_id=#{0} and goods_id =#{1} and date(add_time) = CURDATE()
   </select>
-    <select id="getOrderGoodsAndUserInfoById" parameterType="java.lang.String" resultType="com.ecochain.ledger.model.Page">
+    <select id="getOrderGoodsAndUserInfoById" parameterType="java.lang.String" resultType="com.ecochain.ledger.model.PageData">
         select a.user_type,a.mobile_phone,b.user_id,b.shop_order_no,b.pay_price,goods_name 
         from users_details a,shop_order_goods b 
 		where 1=1
@@ -229,13 +229,13 @@
   <select id="getOneGoodsNameByOrderNo" parameterType="java.lang.String" resultType="java.lang.String">
       select goods_name from shop_order_goods where shop_order_no = #{shop_order_no} limit 0,1
   </select>
-  <select id="getGoodsAndBounsByOrderNo" parameterType="java.lang.String" resultType="com.ecochain.ledger.model.Page">
+  <select id="getGoodsAndBounsByOrderNo" parameterType="java.lang.String" resultType="com.ecochain.ledger.model.PageData">
       select b.*,a.goods_id from shop_order_goods a,goods_bounsparam b 
       where 1=1
       and a.goods_id = b.goods_id
       and a.shop_order_no = #{shop_order_no} limit 0,1
   </select>
-  <update id="updateOrderGoodsStatusByHash" parameterType="com.ecochain.ledger.model.Page">
+  <update id="updateOrderGoodsStatusByHash" parameterType="com.ecochain.ledger.model.PageData">
     update shop_order_goods a,shop_order_info b set a.state = #{state} 
     where 1=1
     and a.shop_order_no = b.order_no 
@@ -245,7 +245,7 @@
     </foreach> 
   </update>
   
-  <update id="updateOrderGoodsStatusByOrderNo" parameterType="com.ecochain.ledger.model.Page">
+  <update id="updateOrderGoodsStatusByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
     update shop_order_goods a set a.state = #{state} 
     where 1=1
     and a.shop_order_no in
@@ -253,4 +253,12 @@
           #{item}   
     </foreach> 
   </update>
+  
+  <select id="getSupplierInfoByOrderNo" parameterType="java.lang.String" resultType="com.ecochain.ledger.model.PageData">
+    select a.user_id,a.id,a.supplier_name 
+    from shop_supplier a,shop_order_goods b 
+    where 1=1
+    and a.id = b.supplier_id 
+    and b.shop_order_no = #{shop_order_no}
+  </select>
 </mapper>

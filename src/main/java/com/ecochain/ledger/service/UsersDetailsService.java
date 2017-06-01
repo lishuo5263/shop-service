@@ -103,4 +103,24 @@ public interface UsersDetailsService {
     
     public List<PageData> listPageUsers(PageData pd)throws Exception;
     
+    /**
+     * @describe:设置交易密码
+     * @author: zhangchunming
+     * @date: 2017年5月31日下午7:59:18
+     * @param pd
+     * @throws Exception
+     * @return: boolean
+     */
+    boolean setTransPassword(PageData pd)throws Exception;
+    
+    /**
+     * @describe:判断交易密码是否正确
+     * @author: zhangchunming
+     * @date: 2017年5月31日下午8:14:22
+     * @param pd
+     * @throws Exception
+     * @return: Boolean
+     */
+    Boolean isExistTransPassword(PageData pd)throws Exception;
+    
 }

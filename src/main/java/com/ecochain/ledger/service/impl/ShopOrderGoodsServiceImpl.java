@@ -72,4 +72,9 @@ public class ShopOrderGoodsServiceImpl implements ShopOrderGoodsService {
         return (Integer)dao.update("com.ecochain.ledger.mapper.ShopOrderGoodsMapper.updateOrderGoodsStatusByOrderNo", pd)>0;
     }
 
+    @Override
+    public PageData getSupplierInfoByOrderNo(String shop_order_no) throws Exception {
+        return (PageData)dao.update("com.ecochain.ledger.mapper.ShopOrderGoodsMapper.getSupplierInfoByOrderNo", shop_order_no);
+    }
+
 }

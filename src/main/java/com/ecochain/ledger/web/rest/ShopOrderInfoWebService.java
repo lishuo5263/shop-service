@@ -34,9 +34,11 @@ import com.ecochain.ledger.model.ShopOrderGoods;
 import com.ecochain.ledger.service.ShopGoodsService;
 import com.ecochain.ledger.service.ShopOrderGoodsService;
 import com.ecochain.ledger.service.ShopOrderInfoService;
+import com.ecochain.ledger.service.ShopOrderLogisticsService;
 import com.ecochain.ledger.service.ShopSupplierService;
 import com.ecochain.ledger.service.SysGenCodeService;
 import com.ecochain.ledger.service.UserWalletService;
+import com.ecochain.ledger.service.UsersDetailsService;
 import com.ecochain.ledger.util.AjaxResponse;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
@@ -71,6 +73,10 @@ public class ShopOrderInfoWebService extends BaseWebService {
     private StoreOrderInfoService storeOrderInfoService;*/
     @Autowired
     private ShopSupplierService shopSupplierService;
+    @Autowired
+    private UsersDetailsService usersDetailsService;
+    @Autowired
+    private ShopOrderLogisticsService shopOrderLogisticsService;
     /*@Autowired
     private StoreInfoService storeInfoService;*/
 
@@ -175,9 +181,12 @@ public class ShopOrderInfoWebService extends BaseWebService {
                 return fastReturn(null, false, "订单生成失败，userId参数为空！", CodeConstant.PARAM_ERROR);
             } else if (!StringUtil.isNotEmpty(String.valueOf(shopOrderGood.get(0).getAddressId()))) {
                 return fastReturn(null, false, "订单生成失败，addressId参数为空！", CodeConstant.PARAM_ERROR);
-            } else if (!StringUtil.isNotEmpty(shopOrderGood.get(0).getPostscript())) {
+            } 
+            /*else if (!StringUtil.isNotEmpty(shopOrderGood.get(0).getPostscript())) {
                 return fastReturn(null, false, "订单生成失败，postscript参数为空！", CodeConstant.PARAM_ERROR);
-            } else if (!StringUtil.isNotEmpty(shopOrderGood.get(0).getUserCode())) {
+            } */
+            
+            else if (!StringUtil.isNotEmpty(shopOrderGood.get(0).getUserCode())) {
                 return fastReturn(null, false, "订单生成失败，userCode参数为空！", CodeConstant.PARAM_ERROR);
             } else if (!StringUtil.isNotEmpty(shopOrderGood.get(0).getIsPromote())) {
                 return fastReturn(null, false, "订单生成失败，isPromote参数为空！", CodeConstant.PARAM_ERROR);
@@ -1395,7 +1404,8 @@ public class ShopOrderInfoWebService extends BaseWebService {
     @ApiImplicitParams({
         @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
         @ApiImplicitParam(name = "order_no", value = "订单号", required = true, paramType = "query", dataType = "String"),
-        @ApiImplicitParam(name = "order_amount", value = "付款金额", required = true, paramType = "query", dataType = "String")
+        @ApiImplicitParam(name = "order_amount", value = "付款金额", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "trans_password", value = "交易密码", required = true, paramType = "query", dataType = "String")
     })
     public AjaxResponse payNow(HttpServletRequest request) {
         Map<String, Object> data = new HashMap<String, Object>();
@@ -1419,6 +1429,19 @@ public class ShopOrderInfoWebService extends BaseWebService {
                 ar.setSuccess(false);
                 ar.setMessage("订单号不能为空");
                 ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                return ar;
+            }
+            if(StringUtil.isEmpty(pd.getString("trans_password"))){
+                ar.setMessage("交易密码不能为空！");
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setSuccess(false);
+                return ar;
+            }
+            Boolean existTransPassword = usersDetailsService.isExistTransPassword(pd);
+            if(!existTransPassword){
+                ar.setMessage("交易密码错误！");
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setSuccess(false);
                 return ar;
             }
             /*if(StringUtil.isEmpty(pd.getString("order_amount"))){
@@ -1516,8 +1539,12 @@ public class ShopOrderInfoWebService extends BaseWebService {
      * @return: AjaxResponse
      */
     @LoginVerify
-    @RequestMapping(value = "/getShopOrderByOrderNo", method = RequestMethod.POST)
-
+    @PostMapping("/getShopOrderByOrderNo")
+    @ApiOperation(nickname = "根据订单号查询订单信息", value = "根据订单号查询订单信息", notes = "根据订单号查询订单信息！")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "order_no", value = "订单号", required = true, paramType = "query", dataType = "String")
+    })
     public AjaxResponse getShopOrderByOrderNo(HttpServletRequest request) {
         Map<String, Object> data = new HashMap<String, Object>();
         AjaxResponse ar = new AjaxResponse();
@@ -1547,6 +1574,55 @@ public class ShopOrderInfoWebService extends BaseWebService {
         return ar;
     }
 
+    /**
+     * @describe:查询物流信息
+     * @author: zhangchunming
+     * @date: 2017年6月1日下午3:40:03
+     * @param request
+     * @return: AjaxResponse
+     */
+    @LoginVerify
+    @RequestMapping(value = "/getLogistics", method = RequestMethod.POST)
+    @ApiOperation(nickname = "查询物流信息", value = "查询物流信息", notes = "查询物流信息！")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "shop_order_no", value = "订单号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "logistics_no", value = "物流号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "CSESSIONID", value = "CSESSIONID", required = false, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getLogistics(HttpServletRequest request) {
+        Map<String, Object> data = new HashMap<String, Object>();
+        AjaxResponse ar = new AjaxResponse();
+        PageData pd = new PageData();
+        pd = this.getPageData();
+        try {
+//            String userstr = SessionUtil.getAttibuteForUser(RequestUtils.getRequestValue(CookieConstant.CSESSIONID, request));
+//            JSONObject user = JSONObject.parseObject(userstr);
+            if (StringUtil.isEmpty(pd.getString("shop_order_no"))) {
+                ar.setSuccess(false);
+                ar.setMessage("请输入订单号");
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                return ar;
+            }
+            if (StringUtil.isEmpty(pd.getString("logistics_no"))) {
+                ar.setSuccess(false);
+                ar.setMessage("请输入物流单号");
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                return ar;
+            }
+            List<PageData> logisticsList = shopOrderLogisticsService.getLogistics(pd);
+            data.put("list", logisticsList);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setMessage("网络繁忙，请稍候重试！");
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+        }
+        return ar;
+    }
+    
     /**
      * @param request
      * @describe:商品退货关闭订单

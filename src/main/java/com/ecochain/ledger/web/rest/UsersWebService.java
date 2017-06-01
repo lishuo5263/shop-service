@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.amazonaws.util.Md5Utils;
 import com.ecochain.ledger.annotation.LoginVerify;
 import com.ecochain.ledger.base.BaseWebService;
 import com.ecochain.ledger.constants.CodeConstant;
@@ -589,6 +590,13 @@ public class UsersWebService extends BaseWebService {
         return ar;
     }
     
+    /**
+     * @describe:获取用户信息
+     * @author: zhangchunming
+     * @date: 2017年5月31日下午7:51:14
+     * @param request
+     * @return: AjaxResponse
+     */
     @LoginVerify
     @PostMapping("/getUserInfo")
     @ApiOperation(nickname = "获取用户基本信息", value = "获取用户基本信息", notes = "获取用户基本信息")
@@ -615,7 +623,71 @@ public class UsersWebService extends BaseWebService {
         return ar;
     }
     
-    
+    /**
+     * @describe:设置交易密码
+     * @author: zhangchunming
+     * @date: 2017年5月31日下午7:53:07
+     * @param request
+     * @return: AjaxResponse
+     */
+    @LoginVerify
+    @PostMapping("/setTransPassword")
+    @ApiOperation(nickname = "设置交易密码", value = "设置交易密码", notes = "设置交易密码")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "trans_password", value = "交易密码", required = true, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "comfirm_trans_password", value = "确认交易密码", required = true, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse setTransPassword(HttpServletRequest request){
+        logBefore(logger,"----------设置交易密码-------------");
+        AjaxResponse ar = new AjaxResponse();
+        PageData pd = this.getPageData();
+        try {
+            String userstr = SessionUtil.getAttibuteForUser(RequestUtils.getRequestValue(CookieConstant.CSESSIONID, request));
+            JSONObject user = JSONObject.parseObject(userstr);
+            pd.put("user_id", String.valueOf(user.get("id")));
+            if(StringUtil.isEmpty(pd.getString("trans_password"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入交易密码！");
+                ar.setSuccess(false);
+                return ar;
+            }
+            
+            if(StringUtil.isEmpty(pd.getString("comfirm_trans_password"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入确认密码！");
+                ar.setSuccess(false);
+                return ar;
+            }
+            
+            if(!pd.getString("trans_password").equals(pd.getString("comfirm_trans_password"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("两次密码设置不一致！");
+                ar.setSuccess(false);
+                return ar;
+            }
+            pd.put("trans_password", MD5Util.getMd5Code(pd.getString("trans_password")));
+            boolean setTransPassword = userDetailsService.setTransPassword(pd);
+            if(setTransPassword){
+                ar.setSuccess(true);
+                ar.setMessage("交易密码设置成功！");
+                return ar;
+            }else{
+                ar.setSuccess(false);
+                ar.setErrorCode(CodeConstant.UPDATE_FAIL);
+                ar.setMessage("交易密码设置失败！");
+                return ar;
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setMessage("网络繁忙，请稍候重试！");
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+        }
+        logAfter(logger);
+        return ar;
+    }
     public static void main(String[] args) {
       //初始  
         /*BigInteger num = new BigInteger("0");  

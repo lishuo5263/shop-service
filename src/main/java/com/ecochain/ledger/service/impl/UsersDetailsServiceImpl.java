@@ -154,4 +154,14 @@ public class UsersDetailsServiceImpl implements UsersDetailsService{
         List<PageData> list = (List<PageData>)dao.findForList("com.ecochain.ledger.mapper.UsersDetailsMapper.listPageUsers", pd);
         return list;
     }
+
+    @Override
+    public boolean setTransPassword(PageData pd) throws Exception {
+        return (Integer)dao.update("com.ecochain.ledger.mapper.UsersDetailsMapper.setTransPassword", pd)>0;
+    }
+
+    @Override
+    public Boolean isExistTransPassword(PageData pd) throws Exception {
+        return (Integer)dao.findForObject("com.ecochain.ledger.mapper.UsersDetailsMapper.isExistTransPassword", pd)>0;
+    }
 }
