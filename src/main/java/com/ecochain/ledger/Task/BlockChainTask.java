@@ -109,15 +109,17 @@ public class BlockChainTask {
         System.out.println("getFromBase64="+str);
         JSONObject data = JSONObject.parseObject(str);
         System.out.println("data="+data);*/
-        PageData pd  = new PageData();
+        /*PageData pd  = new PageData();
         pd.put("user_id", "123456");
         try {
             HttpTool.doPost("http://localhost:3333/logistics-service/api/rest/shopOrder/payNow", JSON.toJSONString(pd));
         } catch (Exception e) {
             e.printStackTrace();
-        } 
+        } */
 ////        HttpUtil.postJson("http://localhost:3333/logistics-service/api/rest/shopOrder/payNow", JSON.toJSONString(pd));
 //        HttpUtil.postData("http://192.168.100.17:3333/logistics-service/api/rest/shopOrder/payNow", JSON.toJSONString(pd), "application/json");
+    
+        System.out.println("data="+Base64.getFromBase64("eyJzdXBwbGllck5hbWUiOiJ0ZXN0IHN1cHBsaWVyIiwiZ29vZHNOdW1iZXIiOiIzIiwidXNlckNv\r\nZGUiOiI5OTkiLCJ1c2VySWQiOjI1ODE3LCJhZGRyZXNzSWQiOiI3NzQiLCJwb3N0c2NyaXB0Ijoi\r\nbHPmtYvor5UiLCJzaGlwcGluZ05hbWUiOiLlm73lhoXnianmtYEiLCJwYXlOYW1lIjoid2VpY2F0\r\nIHBheSIsImdvb2RzSWQiOiIxMTIwIiwic2t1VmFsdWUiOiJsc3RleHRsc2xzbHMiLCJwYXlQcmlj\r\nZSI6IjEwMCIsImNzZXNzaW9uaWQiOiJPV1ZpT1RNMFltWmpNMlU0TkdVeVpEa3daREptWWpkak9H\r\nSmpaR1l6WW1JPSIsImlzUHJvbW90ZSI6IjAiLCJza3VJbmZvIjoiIiwib3JkZXJObyI6IjE3MDUy\r\nNTE4NTQxNTIzMjY4MTk5OSIsImJ1c3NUeXBlIjoiaW5zZXJ0T3JkZXIifQ=="));
     }
 
 }

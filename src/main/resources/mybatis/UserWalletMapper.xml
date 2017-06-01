@@ -182,6 +182,9 @@
       <if test="money != null">
         money = money - #{money},
       </if>
+      <if test="coin_amnt != null">
+        hlb_amnt = hlb_amnt - #{coin_amnt},
+      </if>
       <if test="froze_wlbi_amnt != null">
         froze_wlbi_amnt = froze_wlbi_amnt - #{froze_wlbi_amnt},
       </if>
@@ -190,6 +193,9 @@
       </if>
       <if test="froze_rmb_amnt != null">
         froze_rmb_amnt = froze_rmb_amnt - #{froze_rmb_amnt},
+      </if>
+      <if test="froze_hlb_amnt != null">
+        froze_hlb_amnt = froze_hlb_amnt - #{froze_hlb_amnt},
       </if>
         last_caldate = now(),
       <if test="operator != null">
@@ -207,6 +213,9 @@
      <if test="money != null">
        and money &gt;= #{money}
      </if>
+     <if test="coin_amnt != null">
+       and hlb_amnt &gt;= #{coin_amnt}
+     </if>
      <if test="froze_wlbi_amnt != null">
        and froze_wlbi_amnt &gt;= #{froze_wlbi_amnt}
      </if>
@@ -215,6 +224,9 @@
      </if>
      <if test="froze_rmb_amnt != null">
        and froze_rmb_amnt &gt;= #{froze_rmb_amnt}
+     </if>
+     <if test="froze_hlb_amnt != null">
+       and froze_hlb_amnt &gt;= #{froze_hlb_amnt}
      </if>
   </update>
     <!--   向钱包加钱（三界宝、三界通、人民币） -->
@@ -230,6 +242,9 @@
       <if test="money != null">
         money = money + #{money},
       </if>
+      <if test="coin_amnt != null">
+        hlb_amnt = hlb_amnt + #{coin_amnt},
+      </if>
       <if test="froze_wlbi_amnt != null">
         froze_wlbi_amnt = froze_wlbi_amnt + #{froze_wlbi_amnt},
       </if>
@@ -238,6 +253,9 @@
       </if>
       <if test="froze_rmb_amnt != null">
         froze_rmb_amnt = froze_rmb_amnt + #{froze_rmb_amnt},
+      </if>
+      <if test="froze_hlb_amnt != null">
+        froze_hlb_amnt = froze_hlb_amnt + #{froze_hlb_amnt},
       </if>
         last_caldate = now(),
       <if test="operator != null">
