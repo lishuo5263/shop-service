@@ -28,9 +28,9 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping(value = "/api/rest/logistics")
-public class shopOrderLogisticsDetailWebService extends BaseWebService {
+public class ShopOrderLogisticsDetailWebService extends BaseWebService {
 
-    private Logger logger = Logger.getLogger(shopOrderLogisticsDetailWebService.class);
+    private Logger logger = Logger.getLogger(ShopOrderLogisticsDetailWebService.class);
 
     @Autowired
     private ShopOrderLogisticsDetailService shopOrderLogisticsDetailService;
