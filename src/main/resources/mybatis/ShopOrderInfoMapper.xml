@@ -807,4 +807,9 @@
           #{item}   
     </foreach> 
   </update>
+  <update id="updateOrderStatusByOrderNo2" parameterType="map">
+    update shop_order_info
+    set order_status =  11
+    where order_no = #{order_no}
+  </update>
 </mapper>

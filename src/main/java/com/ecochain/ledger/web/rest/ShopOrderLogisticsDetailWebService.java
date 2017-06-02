@@ -3,11 +3,13 @@ package com.ecochain.ledger.web.rest;
 
 import com.ecochain.ledger.base.BaseWebService;
 import com.ecochain.ledger.constants.CodeConstant;
+import com.ecochain.ledger.constants.Constant;
+import com.ecochain.ledger.mapper.ShopOrderInfoMapper;
 import com.ecochain.ledger.model.Page;
 import com.ecochain.ledger.model.PageData;
-import com.ecochain.ledger.model.ShopGoods;
 import com.ecochain.ledger.service.ShopOrderLogisticsDetailService;
 import com.ecochain.ledger.util.AjaxResponse;
+import com.ecochain.ledger.util.StringUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -18,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by LiShuo on 2017/06/01.
@@ -35,89 +33,90 @@ public class ShopOrderLogisticsDetailWebService extends BaseWebService {
     @Autowired
     private ShopOrderLogisticsDetailService shopOrderLogisticsDetailService;
 
+    @Autowired
+    private ShopOrderInfoMapper shopOrderInfoMapper;
+
     /**
-     * 物流转货
-     */
+     * 物流转货(调区块链)
+     *//*
     @GetMapping("/transferLogistics")
-    @ApiOperation(nickname = "myCartToGenerateOrder", value = "购物车跳转生成订单必要信息查询", notes = "购物车跳转生成订单必要信息查询！！")
+    @ApiOperation(nickname = "transferLogistics", value = "物流转货", notes = "物流转货！！")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "type", value = "查询类型", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "userId", value = "用户ID", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "num", value = "购买个数", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "isPromote", value = "商品订单类型 0普通订单 1秒杀订单 2人民币订单", required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "logistics_no", value = "物流单号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "logistics_msg", value = "物流信息 ", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "type", value = "业务类型 转货传值为 transferLogistics ，新增物流信息随意传值 ", required = true, paramType = "query", dataType = "String")
     })
-    public AjaxResponse transferLogistics(HttpServletRequest request, Page page){
+    public AjaxResponse transferLogistics(HttpServletRequest request, Page page) {
         PageData pd = new PageData();
         pd = this.getPageData();
         page.setPd(pd);
-        AjaxResponse ar= new AjaxResponse();
-        Map<String, Object> map=new HashMap<String, Object>();
-        List<ShopGoods> listt =new ArrayList<ShopGoods>();
-        String userId=null;
-        String goodsId=null;
-        String num=null;
-        String[] id=null;
-        try{
-       /* String type=(String)pd.get("type");
-        String isPromote=(String)pd.get("isPromote");
-        if(type.equals("directBuy")){
-            userId =(String)pd.get("userId");
-            goodsId=(String)pd.get("goodsId");
-            num=(String)pd.get("num");
-            map.put("num",num);
-        }else if(type.equals("generateOrder")){
-            userId =(String)pd.get("userId");
-            id=pd.getString("id").split(",");
-            num=(String)pd.get("num");
-            map.put("userId",userId);
-            map.put("num",num);
-        }else if(type.equals("RMBBuy")){  //购买人民币种类商品
-            goodsId=(String)pd.get("goodsId");
-            map.put("toGenerateOrderInfo",this.shopGoodsService.queryRMBGoodsDetailInfoByGoodsId(goodsId));
-            return fastReturn(map,true,"查询立即购买人民币商品信息成功！",CodeConstant.SC_OK);
+        AjaxResponse ar = new AjaxResponse();
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            String logisticsNo = (String) pd.get("logistics_no");
+            String type = pd.getString("type");
+            if (!StringUtil.isNotEmpty(logisticsNo)) {
+                return fastReturn(null, false, "接口参数logistics_no异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+            }
+            map = shopOrderLogisticsDetailService.findLogisticsInfoByNo(logisticsNo);//查询物流信息
+            if (map.containsKey("shop_order_no") && map.containsKey("logistics_hash")) {
+                //修改发货状态 && 更新物流详情
+                pd.put("logistics_hash", map.containsKey("logistics_hash") == true ? map.get("logistics_hash") : "");
+                pd.put("type", type);
+                pd.put("logistics_no", logisticsNo);
+                pd.put("shop_order_no", map.get("shop_order_no").toString());
+                pd.put("bussType", "outerTransferLogisticss");
+                this.shopOrderLogisticsDetailService.transferLogistics(pd, Constant.VERSION_NO);
+                return fastReturn(map, true, "物流转货成功！", CodeConstant.SC_OK);
+            } else {
+                return fastReturn(null, false, "接口参数异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+            }
+        } catch (ClassCastException e) {
+            logger.debug(e.toString(), e);
+            ar = fastReturn(null, false, "接口参数类型异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+        } catch (NullPointerException e) {
+            logger.debug(e.toString(), e);
+            ar = fastReturn(null, false, "接口参数异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+        } catch (Exception e) {
+            logger.debug(e.toString(), e);
+            ar = fastReturn(null, false, "系统异常，物流转货失败！", CodeConstant.SYS_ERROR);
         }
-        logger.info("购物车跳转生成订单必要信息查询");
-            if(!StringUtil.isNotEmpty(userId)){
-                return fastReturn(null,false,"接口参数userId异常，购物车跳转生成订单必要信息查询失败！",CodeConstant.PARAM_ERROR);
-            }else if(StringUtil.isNotEmpty(goodsId) && StringUtil.isNotEmpty(num)){   //立即购买信息查询  PHP秒杀下单
-                listt=this.shopCartService.queryGoodsDetailInfoByGoodsId(goodsId,isPromote);
-                if(listt !=null && listt.size() >0){
-                    listt.get(0).setNum(num);
-                    map.put("toGenerateOrderInfo",listt);
-                    map.remove("userId");
-                    map.remove("list");
-                    map.remove("num");
-                    return fastReturn(map,true,"查询立即购买商品信息成功！",CodeConstant.SC_OK);
-                }else{
-                    return fastReturn(map,true,"接口查询立即购买商品信息失败，查询不到相关信息！",CodeConstant.SC_OK);
-                }
-            }else if(id !=null && id.length >0) {
-                    List<String> list = Arrays.asList(id);
-                    map.put("list",list);
-                    List list2=this.shopCartService.queryCartAllGoodsID(map);
-                    if(list.size() ==list2.size()){ //去查询跳转生成订单页面数据查询
-                        list=this.shopCartService.myCartToGenerateOrder(map);
-                        map.put("toGenerateOrderInfo",list);
-                        map.remove("userId");
-                        map.remove("list");
-                        map.remove("num");
-                        ar=fastReturn(map,true,"购物车跳转生成订单必要信息查询成功！",CodeConstant.SC_OK);
-                    }else{
-                        return fastReturn(null,false,"接口参数id与数据库不匹配，购物车跳转生成订单必要信息查询失败！",CodeConstant.SC_OK);
-                    }
-            }else{
-                ar=fastReturn(null,false,"接口参数id异常，购物车跳转生成订单必要信息查询失败！",CodeConstant.PARAM_ERROR);
-            }*/
-        } catch (ClassCastException e){
+        return ar;
+    }*/
+
+    /*
+     * 物流转货数据同步(不调区块链)
+     */
+    @GetMapping("/transferLogisticsWithOutBlockChain")
+    @ApiOperation(nickname = "transferLogisticsWithOutBlockChain", value = "物流转货不调区块链", notes = "物流转货不调区块链！！")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "logistics_no", value = "物流单号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "logistics_msg", value = "物流信息", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "create_time", value = "创建时间", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "hash", value = "hash", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "shop_order_no", value = "订单号", required = true, paramType = "query", dataType = "String"),
+    })
+    public AjaxResponse transferLogisticsWithOutBlockChain(HttpServletRequest request, Page page) {
+        PageData pd = new PageData();
+        pd = this.getPageData();
+        page.setPd(pd);
+        AjaxResponse ar = new AjaxResponse();
+        try {
+            if (!StringUtil.isNotEmpty(pd.getString("logistics_no")) && !StringUtil.isNotEmpty(pd.getString("logistics_msg")) && !StringUtil.isNotEmpty(pd.getString("hash")) && !StringUtil.isNotEmpty(pd.getString("create_time")) && !StringUtil.isNotEmpty(pd.getString("shop_order_no")) ) {
+                return fastReturn(null, false, "接口参数logistics_no异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+            }
+            pd.put("logistics_detail_hash",pd.getString("hash"));
+            this.shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO);
+            return fastReturn(true, true, "物流转货成功！", CodeConstant.SC_OK);
+        } catch (ClassCastException e) {
             logger.debug(e.toString(), e);
-            ar=fastReturn(null,false,"接口参数类型异常，购物车跳转生成订单必要信息查询失败！", CodeConstant.PARAM_ERROR);
-        }catch(NullPointerException e){
+            ar = fastReturn(null, false, "接口参数类型异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+        } catch (NullPointerException e) {
             logger.debug(e.toString(), e);
-            ar=fastReturn(null,false,"接口参数异常，购物车跳转生成订单必要信息查询失败！", CodeConstant.PARAM_ERROR);
-        }catch(Exception e){
+            ar = fastReturn(null, false, "接口参数异常，物流转货失败！", CodeConstant.PARAM_ERROR);
+        } catch (Exception e) {
             logger.debug(e.toString(), e);
-            ar=fastReturn(null,false,"系统异常，购物车跳转生成订单必要信息查询失败！", CodeConstant.SYS_ERROR);
+            ar = fastReturn(null, false, "系统异常，物流转货失败！", CodeConstant.SYS_ERROR);
         }
         return ar;
     }

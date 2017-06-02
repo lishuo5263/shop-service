@@ -1,6 +1,5 @@
 package com.ecochain.ledger.Task;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.constants.Constant;
 import com.ecochain.ledger.model.BlockDataHash;
@@ -18,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -86,6 +86,14 @@ public class BlockChainTask {
                     if("deliverGoods".equals(data.getString("bussType"))){
                         HttpTool.doGet("http://localhost:"+servicePort+"/"+serviceName+"/api/rest/shopOrder/deliverGoods?shop_order_no="+data.getString("shop_order_no") +"&goods_id="+data.getString("goods_id") +"&logistics_no="+data.getString("logistics_no") +"&logistics_hash="+resultInfo.getString("hash") +"&logistics_name="+data.getString("logistics_name") +"");
                         this.blockDataHashService.insert(blockDataHash);
+                    }else if("innerTransferLogisticss".equals(data.getString("bussType"))){
+                        data.put("hash", hash);
+                        HttpTool.doGet("http://localhost:"+servicePort+"/"+serviceName+"/api/rest/logistics/transferLogisticsWithOutBlockChain?logistics_no="+data.getString("logistics_no") +"&logistics_msg="+data.getString("logistics_msg") +"&create_time="+ URLEncoder.encode(data.getString("create_time"),"UTF-8") +"&hash="+resultInfo.getString("hash") +"&shop_order_no="+ data.getString("shop_order_no") +"");
+                        this.blockDataHashService.insert(blockDataHash);
+                    }else if("outerTransferLogisticss".equals(data.getString("bussType"))){
+                        data.put("hash", hash);
+                        HttpTool.doGet("http://localhost:"+servicePort+"/"+serviceName+"/api/rest/logistics/transferLogisticsWithOutBlockChain?logistics_no="+data.getString("logistics_no") +"&logistics_msg="+data.getString("logistics_msg") +"&create_time="+ URLEncoder.encode(data.getString("create_time"),"UTF-8") +"&hash="+resultInfo.getString("hash") +"&shop_order_no="+ data.getString("shop_order_no") +"");
+                        this.blockDataHashService.insert(blockDataHash);
                     }
                     
                     /*if("payNow".equals(data.getString("bussType"))){
@@ -118,7 +126,6 @@ public class BlockChainTask {
         } */
 ////        HttpUtil.postJson("http://localhost:3333/logistics-service/api/rest/shopOrder/payNow", JSON.toJSONString(pd));
 //        HttpUtil.postData("http://192.168.100.17:3333/logistics-service/api/rest/shopOrder/payNow", JSON.toJSONString(pd), "application/json");
-    
         System.out.println("data="+Base64.getFromBase64("eyJzdXBwbGllck5hbWUiOiJ0ZXN0IHN1cHBsaWVyIiwiZ29vZHNOdW1iZXIiOiIzIiwidXNlckNv\r\nZGUiOiI5OTkiLCJ1c2VySWQiOjI1ODE3LCJhZGRyZXNzSWQiOiI3NzQiLCJwb3N0c2NyaXB0Ijoi\r\nbHPmtYvor5UiLCJzaGlwcGluZ05hbWUiOiLlm73lhoXnianmtYEiLCJwYXlOYW1lIjoid2VpY2F0\r\nIHBheSIsImdvb2RzSWQiOiIxMTIwIiwic2t1VmFsdWUiOiJsc3RleHRsc2xzbHMiLCJwYXlQcmlj\r\nZSI6IjEwMCIsImNzZXNzaW9uaWQiOiJPV1ZpT1RNMFltWmpNMlU0TkdVeVpEa3daREptWWpkak9H\r\nSmpaR1l6WW1JPSIsImlzUHJvbW90ZSI6IjAiLCJza3VJbmZvIjoiIiwib3JkZXJObyI6IjE3MDUy\r\nNTE4NTQxNTIzMjY4MTk5OSIsImJ1c3NUeXBlIjoiaW5zZXJ0T3JkZXIifQ=="));
     }
 

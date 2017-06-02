@@ -35,6 +35,8 @@ public interface ShopOrderInfoMapper {
 
     boolean updateShopOrderGoodsCancleStatus(String orderNo);
 
+    boolean updateOrderStatusByOrderNo2(String orderNo);
+
     boolean updateShopGoodsGoods(String orderNo);
 
     int querySecKillCount(Integer userId);
@@ -48,4 +50,6 @@ public interface ShopOrderInfoMapper {
     String querySimpleGoodsInfo(String orderNum);
 
     String queryOrderNum(String orderNum);
+
+    boolean updateHashByOrderNo(Map updateMap);
 }
