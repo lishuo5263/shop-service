@@ -59,7 +59,7 @@ public class UsersDetailsServiceImpl implements UsersDetailsService{
         //添加用户登陆表
         dao.save("UserLoginMapper.insertSelective", pd);
         //添加用户钱包账户
-        pd.put("future_currency", 1000000);
+        pd.put("money", 1000000);
         dao.save("UserWalletMapper.insertSelective", pd);
         
         StringBuffer buf = new StringBuffer();
