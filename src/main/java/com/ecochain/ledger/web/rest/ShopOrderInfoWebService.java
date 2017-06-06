@@ -42,6 +42,7 @@ import com.ecochain.ledger.service.UsersDetailsService;
 import com.ecochain.ledger.util.AjaxResponse;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
+import com.ecochain.ledger.util.MD5Util;
 import com.ecochain.ledger.util.OrderGenerater;
 import com.ecochain.ledger.util.RequestUtils;
 import com.ecochain.ledger.util.SessionUtil;
@@ -1437,6 +1438,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
                 ar.setSuccess(false);
                 return ar;
             }
+            pd.put("trans_password", MD5Util.getMd5Code(pd.getString("trans_password")));
             Boolean existTransPassword = usersDetailsService.isExistTransPassword(pd);
             if(!existTransPassword){
                 ar.setMessage("交易密码错误！");
