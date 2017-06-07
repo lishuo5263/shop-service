@@ -994,4 +994,9 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     public boolean updateStatusByOrderNo(PageData pd, String versionNo) throws Exception {
         return (Integer)dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStatusByOrderNo", pd)>0;
     }
+
+    @Override
+    public String getOrderStatusByOrderNo(String order_no) throws Exception {
+        return (String)dao.findForObject("com.ecochain.ledger.mapper.ShopOrderInfoMapper.getOrderStatusByOrderNo", order_no);
+    }
 }
