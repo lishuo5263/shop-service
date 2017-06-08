@@ -1,24 +1,5 @@
 package com.ecochain.ledger.web.rest;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.JavaType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.annotation.LoginVerify;
 import com.ecochain.ledger.base.BaseWebService;
@@ -27,23 +8,22 @@ import com.ecochain.ledger.constants.Constant;
 import com.ecochain.ledger.constants.CookieConstant;
 import com.ecochain.ledger.model.PageData;
 import com.ecochain.ledger.model.ShopOrderGoods;
-import com.ecochain.ledger.service.ShopGoodsService;
-import com.ecochain.ledger.service.ShopOrderGoodsService;
-import com.ecochain.ledger.service.ShopOrderInfoService;
-import com.ecochain.ledger.service.ShopOrderLogisticsService;
-import com.ecochain.ledger.service.ShopSupplierService;
-import com.ecochain.ledger.service.SysGenCodeService;
-import com.ecochain.ledger.service.UserWalletService;
-import com.ecochain.ledger.service.UsersDetailsService;
-import com.ecochain.ledger.util.AjaxResponse;
+import com.ecochain.ledger.service.*;
+import com.ecochain.ledger.util.*;
 import com.ecochain.ledger.util.Base64;
-import com.ecochain.ledger.util.DateUtil;
-import com.ecochain.ledger.util.MD5Util;
-import com.ecochain.ledger.util.OrderGenerater;
-import com.ecochain.ledger.util.RequestUtils;
-import com.ecochain.ledger.util.SessionUtil;
-import com.ecochain.ledger.util.StringUtil;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.JavaType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Created by LiShuo on 2016/10/28.
@@ -210,9 +190,11 @@ public class ShopOrderInfoWebService extends BaseWebService {
                     shopOrderGood.get(0).setOrderNo(OrderGenerater.generateOrderNo(shopOrderGood.get(0).getUserCode()));
                     shopOrderGood.get(0).setOrderStatus(1);
                     shopOrderGood.get(0).setUserId(Integer.valueOf(user.getString("id")));
+                    shopOrderGood.get(0).setUserName(user.getString("user_name"));
                     shopOrderGood.get(0).setShippingFee(new BigDecimal(0));
                     shopOrderGood.get(0).setIntegralMoney(new BigDecimal(0));
                     shopOrderGood.get(0).setTradeHash(user.getString("seeds"));
+                    shopOrderGood.get(0).setCreateTime(DateUtil.getCurrDateTime());
                     shopOrderGood.get(0).setData(new StringBuffer(shopOrderGoods.substring(0,shopOrderGoods.length()-1)).append(",\"orderNo\":\""+shopOrderGood.get(0).getOrderNo()+"\"").append(",\"bussType\":\"insertOrder\"}").toString());
                     result = this.shopOrderInfoService.insertShopOrder(shopOrderGood);
                     if (result.get(0).get("ErrorInsert") != null) {
@@ -914,6 +896,8 @@ public class ShopOrderInfoWebService extends BaseWebService {
             }
             pd.put("shop_order_no", order_no);
             pd.put("bussType", "confirmReceipt");
+            pd.put("create_time", DateUtil.getCurrDateTime());
+            pd.put("user_name", user.getString("user_name"));
             PageData orderGoods = shopOrderGoodsService.getOrderGoods(pd, Constant.VERSION_NO);
             if (orderGoods == null) {
                 return fastReturn("订单不存在",false,"订单不存在",CodeConstant.ORDER_NO_EXISTS);

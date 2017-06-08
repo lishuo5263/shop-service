@@ -12,7 +12,6 @@ import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpUtil;
 import com.ecochain.ledger.util.StringUtil;
 import com.github.pagehelper.PageHelper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -64,6 +62,10 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     private QklLibService qklLibService;
     @Autowired
     private SysGenCodeService sysGenCodeService;
+    @Autowired
+    private ShopOrderLogisticsDetailMapper shopOrderLogisticsDetailMapper;
+    @Autowired
+    private ShopOrderLogisticsDetailService shopOrderLogisticsDetailService;
 
     @Override
     public boolean updateOrderRefundStatus(String orderNo) {
@@ -248,37 +250,6 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
                 kql_url = mapObj.get("code_value").toString();
             }
         }
-        logger.info("====================测试代码========start================");
-        String jsonStr = HttpUtil.sendPostData(""+ kql_url+"/get_new_key", "");
-        JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
-        PageData keyPd = new PageData();
-        keyPd.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
-        keyPd.put("publicKey",keyJsonObj.getJSONObject("result").getString("publicKey"));
-        keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
-        System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
-        //2. 获取公钥签名
-        String signJsonObjStr =HttpUtil.sendPostData(""+ kql_url+"/send_data_for_sign", JSON.toJSONString(keyPd));
-        JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
-        Map<String, Object> paramentMap =new HashMap<String, Object>();
-        paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
-        paramentMap.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
-        paramentMap.put("sign",signJsonObj.getString("result"));
-        String result1 = HttpUtil.sendPostData(""+ kql_url+"/send_data_to_sys", JSON.toJSONString(paramentMap));
-        JSONObject json = JSON.parseObject(result1);
-        if(StringUtil.isNotEmpty(json.getString("result"))){
-            shopOrderGoods.get(0).setTradeHash(json.getString("result"));
-        }
-        logger.info("====================测试代码=======end=================");
-
-       /* String tradeResult=qklLibService.sendDataToSys(shopOrderGoods.get(0).getTradeHash(), Base64.getBase64(shopOrderGoods.get(0).getData()));//此时TradeHash值为seeds
-        JSONObject json = JSON.parseObject(tradeResult);
-        if(StringUtil.isNotEmpty(json.getString("result"))&&!json.getString("result").contains("failure")){
-            shopOrderGoods.get(0).setTradeHash(json.getString("result"));
-        }else{
-            map.put("ErrorInsertByBlockChain","订单生成失败，调用区块链接口发生错误！");
-            result.add(map);
-            return result;
-        }*/
         if ("0".equals(shopOrderGoods.get(0).getIsPromote())) { //商城普通订单
             for (int i = 0; i < shopOrderGoods.size(); i++) {
                 if (StringUtils.isNotEmpty(String.valueOf(shopOrderGoods.get(i).getGoodsId()))) {
@@ -370,6 +341,27 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         map.put("list", list);
         map.put("list2", list2);
         map.put("userId", shopOrderGoods.get(0).getUserId());
+        logger.info("====================测试代码========start================");
+        String jsonStr = HttpUtil.sendPostData(""+ kql_url+"/get_new_key", "");
+        JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
+        PageData keyPd = new PageData();
+        keyPd.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
+        keyPd.put("publicKey",keyJsonObj.getJSONObject("result").getString("publicKey"));
+        keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
+        System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
+        //2. 获取公钥签名
+        String signJsonObjStr =HttpUtil.sendPostData(""+ kql_url+"/send_data_for_sign", JSON.toJSONString(keyPd));
+        JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
+        Map<String, Object> paramentMap =new HashMap<String, Object>();
+        paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
+        paramentMap.put("data",Base64.getBase64((shopOrderGoods.get(0).getData())));
+        paramentMap.put("sign",signJsonObj.getString("result"));
+        String result1 = HttpUtil.sendPostData(""+ kql_url+"/send_data_to_sys", JSON.toJSONString(paramentMap));
+        JSONObject json = JSON.parseObject(result1);
+        if(StringUtil.isNotEmpty(json.getString("result"))){
+            shopOrderGoods.get(0).setTradeHash(json.getString("result"));
+        }
+        logger.info("====================测试代码=======end=================");
         this.shopOrderGoodsMapper.insert(shopOrderGoods);//新增商品信息
         shopOrderGoods.get(0).setGoodsAmount(totalMoney);
         shopOrderGoods.get(0).setOrderAmount(totalMoney);
@@ -722,6 +714,15 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         json = JSON.parseObject(result1);
         if (StringUtil.isNotEmpty(json.getString("result"))) {
             pd.put("confirm_receipt_hash", json.getString("result"));
+        }
+        logger.info("====================确认收货新加物流信息=======start=================");
+        Map infoMap=shopOrderLogisticsDetailMapper.findLogisticsInfoByOrderNo(pd.getString("shop_order_no"));
+        pd.put("logistics_no", infoMap.get("logistics_no"));
+        //pd.put("logistics_msg", pd.getString("user_name")+"确认收货");
+        pd.put("logistics_msg", "确认收货");
+        pd.put("logistics_detail_hash", pd.getString("confirm_receipt_hash"));
+        if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
+            logger.info("====================确认收货新加物流信息=======end=================");
         }
         logger.info("====================测试代码=======end=================");
         return (Integer) dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStateByOrderNo", pd) > 0;

@@ -62,6 +62,8 @@ public class ShopOrderGoods implements Serializable {
 
     private String userCode;
 
+    private String userName;
+
     private String  csessionid;
 
     //与ShopOrderInfo 集成，加入bean 属性，在ShopOrderGoods resultMap中不配置 bean新增属性
@@ -101,9 +103,27 @@ public class ShopOrderGoods implements Serializable {
 
     private Date addTime;
 
+    private String createTime;
+
     private Date shippingTime;
 
     private String data;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
 
     public String getActivityId() {
         return activityId;
