@@ -12,7 +12,6 @@ import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpUtil;
 import com.ecochain.ledger.util.StringUtil;
 import com.github.pagehelper.PageHelper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -64,6 +62,10 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     private QklLibService qklLibService;
     @Autowired
     private SysGenCodeService sysGenCodeService;
+    @Autowired
+    private ShopOrderLogisticsDetailMapper shopOrderLogisticsDetailMapper;
+    @Autowired
+    private ShopOrderLogisticsDetailService shopOrderLogisticsDetailService;
 
     @Override
     public boolean updateOrderRefundStatus(String orderNo) {
@@ -712,6 +714,15 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         json = JSON.parseObject(result1);
         if (StringUtil.isNotEmpty(json.getString("result"))) {
             pd.put("confirm_receipt_hash", json.getString("result"));
+        }
+        logger.info("====================确认收货新加物流信息=======start=================");
+        Map infoMap=shopOrderLogisticsDetailMapper.findLogisticsInfoByOrderNo(pd.getString("shop_order_no"));
+        pd.put("logistics_no", infoMap.get("logistics_no"));
+        //pd.put("logistics_msg", pd.getString("user_name")+"确认收货");
+        pd.put("logistics_msg", "确认收货");
+        pd.put("logistics_detail_hash", pd.getString("confirm_receipt_hash"));
+        if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
+            logger.info("====================确认收货新加物流信息=======end=================");
         }
         logger.info("====================测试代码=======end=================");
         return (Integer) dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStateByOrderNo", pd) > 0;
