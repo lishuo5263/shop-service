@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -369,4 +370,131 @@ public class BlockDataWebService extends BaseWebService{
         }   
         return ar;
     }
+    
+    /**
+     * @describe:获取最新的若干区块数据
+     * @author: zhangchunming
+     * @date: 2017年6月7日下午7:58:50
+     * @param request
+     * @return: AjaxResponse
+     */
+    /*@PostMapping("/getBlockChain")
+    @ApiOperation(nickname = "获取最新的若干区块数据", value = "获取最新的若干区块数据", notes = "获取最新的若干区块数据")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "rows", value = "获取最新的若干区块数据", required = false, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getBlockChain(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = this.getPageData();
+        try {
+            String kql_url =null;
+            List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+            for(PageData mapObj:codeList){
+                if("QKL_URL".equals(mapObj.get("code_name"))){
+                    kql_url = mapObj.get("code_value").toString();
+                }
+            }
+            String rows = "10";
+            if(pd.getRows()!=null){
+                rows = String.valueOf(pd.getRows());
+            }
+            String result = HttpTool.doPost(kql_url+"/GetBlockList", rows);
+            JSONObject blockData = JSONObject.parseObject(result);
+            JSONArray blockArray  = blockData.getJSONArray("result");
+            for(Object block :blockArray ){
+                JSONObject blockJson = (JSONObject)block;
+                String blockHash = blockJson.getString("blockHash");
+                String result1 = HttpTool.doPost(kql_url+"/GetBlockDetail", blockHash);
+                JSONObject blockDetail = JSONObject.parseObject(result1);
+                if(blockDetail.getJSONObject("result").getJSONArray("qtx").size()>0){
+                    
+                }
+                blockJson.put("generateTime",DateUtil.stampToDate(blockJson.getString("generateTime")));
+            }
+            data.put("list", blockData);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
+    }*/
+    
+    /**
+     * @describe:获取前10条数据
+     * @author: zhangchunming
+     * @date: 2017年6月8日上午10:28:31
+     * @param request
+     * @return: AjaxResponse
+     */
+    @PostMapping("/getDataList10")
+    @ApiOperation(nickname = "获取最新的记录数据", value = "获取最新的记录数据", notes = "获取最新的记录数据")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "rows", value = "查询条数", required = false, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getDataList10(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = this.getPageData();
+        try {
+            String kql_url =null;
+            List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+            for(PageData mapObj:codeList){
+                if("QKL_URL".equals(mapObj.get("code_name"))){
+                    kql_url = mapObj.get("code_value").toString();
+                }
+            }
+            String rows = "10";
+            if(pd.getRows()!=null){
+                rows = String.valueOf(pd.getRows());
+            }
+            String result = HttpTool.doPost(kql_url+"/GetDataList", rows);
+            JSONObject blockData = JSONObject.parseObject(result);
+            JSONArray blockArray = blockData.getJSONArray("result");
+            for(Object trade:blockArray){
+                JSONObject tradeJSON = (JSONObject)trade;
+                String dataStr = Base64.getFromBase64(tradeJSON.getString("data"));
+                JSONObject jsonData = null;
+                try {
+                    jsonData = JSONObject.parseObject(dataStr);
+                } catch (Exception e) {
+                    System.out.println("不是一个json字符串");
+                    continue;
+                }
+                if(jsonData==null){
+                    continue;
+                }
+                if("insertOrder".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goods_name")+",数量："+jsonData.getString("goodsNumber")+",金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+"，订单状态：待支付");
+                    jsonData.put("create_time", jsonData.getString("createtime"));
+                }else if("payNow".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",金额："+jsonData.get("order_amount")+",订单状态：已支付");
+                }else if("deliverGoods".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "发货，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
+                    jsonData.put("create_time", jsonData.getString("createtime"));
+                }else if("innerTransferLogisticss".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "国内物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }
+                tradeJSON.put("data", jsonData);
+            }
+            data.put("list", blockData);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
+    }
+    
 }
