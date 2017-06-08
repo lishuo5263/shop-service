@@ -210,9 +210,11 @@ public class ShopOrderInfoWebService extends BaseWebService {
                     shopOrderGood.get(0).setOrderNo(OrderGenerater.generateOrderNo(shopOrderGood.get(0).getUserCode()));
                     shopOrderGood.get(0).setOrderStatus(1);
                     shopOrderGood.get(0).setUserId(Integer.valueOf(user.getString("id")));
+                    shopOrderGood.get(0).setUserName(user.getString("user_name"));
                     shopOrderGood.get(0).setShippingFee(new BigDecimal(0));
                     shopOrderGood.get(0).setIntegralMoney(new BigDecimal(0));
                     shopOrderGood.get(0).setTradeHash(user.getString("seeds"));
+                    shopOrderGood.get(0).setCreateTime(DateUtil.getCurrDateTime());
                     shopOrderGood.get(0).setData(new StringBuffer(shopOrderGoods.substring(0,shopOrderGoods.length()-1)).append(",\"orderNo\":\""+shopOrderGood.get(0).getOrderNo()+"\"").append(",\"bussType\":\"insertOrder\"}").toString());
                     result = this.shopOrderInfoService.insertShopOrder(shopOrderGood);
                     if (result.get(0).get("ErrorInsert") != null) {
@@ -914,6 +916,8 @@ public class ShopOrderInfoWebService extends BaseWebService {
             }
             pd.put("shop_order_no", order_no);
             pd.put("bussType", "confirmReceipt");
+            pd.put("create_time", DateUtil.getCurrDateTime());
+            pd.put("user_name", user.getString("user_name"));
             PageData orderGoods = shopOrderGoodsService.getOrderGoods(pd, Constant.VERSION_NO);
             if (orderGoods == null) {
                 return fastReturn("订单不存在",false,"订单不存在",CodeConstant.ORDER_NO_EXISTS);
