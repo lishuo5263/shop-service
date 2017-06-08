@@ -30,6 +30,7 @@ import com.ecochain.ledger.util.AjaxResponse;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpTool;
+import com.ecochain.ledger.util.JedisUtil;
 import com.ecochain.ledger.util.Logger;
 /**
  * 账户控制类
@@ -481,6 +482,10 @@ public class BlockDataWebService extends BaseWebService{
                     jsonData.put("describe", "国内物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
                 }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no"));
+                }else{
+                    continue;
                 }
                 tradeJSON.put("data", jsonData);
             }
@@ -494,6 +499,109 @@ public class BlockDataWebService extends BaseWebService{
             ar.setErrorCode(CodeConstant.SYS_ERROR);
             ar.setMessage("网络繁忙，请稍候重试！");
         }   
+        return ar;
+    }
+    
+    
+    /**
+     * @describe:获取前10条数据
+     * @author: zhangchunming
+     * @date: 2017年6月8日上午10:28:31
+     * @param request
+     * @return: AjaxResponse
+     */
+    @PostMapping("/getBlockList10")
+    @ApiOperation(nickname = "获取最新的区块列表", value = "获取最新的区块列表", notes = "获取最新的区块列表")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "rows", value = "查询条数", required = false, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getBlockList10(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        try {
+            List<JSONObject> blockList = (List<JSONObject>)JedisUtil.get("blockList");
+            data.put("blockList", blockList);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
+    }
+    
+    /**
+     * @describe:根据区块hash查询交易信息
+     * @author: zhangchunming
+     * @date: 2017年6月8日下午4:07:11
+     * @param request
+     * @return
+     * @return: AjaxResponse
+     */
+    @PostMapping("/getDataByBlockHash")
+    @ApiOperation(nickname = "根据区块hash查询交易信息", value = "根据区块hash查询交易信息", notes = "根据区块hash查询交易信息")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "hash", value = "区块hash，需带双引号", required = false, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getDataByBlockHash(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = this.getPageData();
+        try {
+            if(StringUtil.isEmpty(pd.getString("hash"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入区块hash！");
+                ar.setSuccess(false);
+                return ar;
+            }
+            
+            String kql_url =null;
+            List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+            for(PageData mapObj:codeList){
+                if("QKL_URL".equals(mapObj.get("code_name"))){
+                    kql_url = mapObj.get("code_value").toString();
+                }
+            }
+            String result = HttpTool.doPost(kql_url+"/GetBlockDetail", pd.getString("hash"));
+            JSONObject blockDetail = JSONObject.parseObject(result);
+            JSONArray dataArray = new JSONArray();
+            for(Object trade:blockDetail.getJSONObject("result").getJSONArray("qtx")){
+                String dataHash = "\""+(String)trade+"\"";
+                String result1 = HttpTool.doPost(kql_url+"/get_data_from_sys", dataHash);
+                JSONObject tradeJson = JSONObject.parseObject(result1);
+                String dataStr = Base64.getFromBase64(tradeJson.getJSONObject("result").getString("data"));
+                JSONObject jsonData = JSONObject.parseObject(dataStr);
+                if("insertOrder".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goods_name")+",数量："+jsonData.getString("goodsNumber")+",金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+"，订单状态：待支付");
+                    jsonData.put("create_time", jsonData.getString("createtime"));
+                }else if("payNow".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",金额："+jsonData.get("order_amount")+",订单状态：已支付");
+                }else if("deliverGoods".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "发货，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
+                    jsonData.put("create_time", jsonData.getString("createtime"));
+                }else if("innerTransferLogisticss".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "国内物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no"));
+                }
+                dataArray.add(jsonData);
+            }
+            blockDetail.getJSONObject("result").put("qtx", dataArray);
+            data.put("blockDetail", blockDetail);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }  
         return ar;
     }
     
