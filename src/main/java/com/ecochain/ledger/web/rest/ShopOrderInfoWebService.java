@@ -17,11 +17,7 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.annotation.LoginVerify;
@@ -885,6 +881,53 @@ public class ShopOrderInfoWebService extends BaseWebService {
         }
         return fastReturn(null, false, "系统异常，生成用户ID为：" + shopOrderGood.get(0).getUserId() + "的订单失败！", CodeConstant.SYS_ERROR);
     }*/
+
+    /**
+     * @author lisandro
+     * @date 2017年6月8日10:41:15
+     * @describe 确认收货
+     * @param request
+     * @return
+     */
+    @LoginVerify
+    @GetMapping("/confirmReceipt")
+    @ApiOperation(nickname = "确认收货", value = "确认收货", notes = "确认收货！")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "CSESSIONID", value = "CSESSIONID", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "order_no", value = "订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "goods_id", value = "商品ID", required = false, paramType = "query", dataType = "String"),
+    })
+    public AjaxResponse confirmReceipt(HttpServletRequest request) {
+        AjaxResponse ar = new AjaxResponse();
+        try {
+            String userstr = SessionUtil.getAttibuteForUser(RequestUtils.getRequestValue(CookieConstant.CSESSIONID, request));
+            JSONObject user = JSONObject.parseObject(userstr);
+            PageData pd = new PageData();
+            pd = this.getPageData();
+            pd.put("user_id", user.getInteger("id"));
+            String order_no = pd.getString("order_no");
+            if (StringUtil.isEmpty(order_no)) {
+                return fastReturn("订单号不能为空！",false,"订单号不能为空！",CodeConstant.PARAM_ERROR);
+            }
+            if (StringUtil.isEmpty(pd.getString("goods_id"))) {
+                return fastReturn("商品ID不能为空！",false,"商品ID不能为空！",CodeConstant.PARAM_ERROR);
+            }
+            pd.put("shop_order_no", order_no);
+            pd.put("bussType", "confirmReceipt");
+            PageData orderGoods = shopOrderGoodsService.getOrderGoods(pd, Constant.VERSION_NO);
+            if (orderGoods == null) {
+                return fastReturn("订单不存在",false,"订单不存在",CodeConstant.ORDER_NO_EXISTS);
+            }
+            if (shopOrderInfoService.updateStateByOrderNo(pd, Constant.VERSION_NO)) {
+                return fastReturn("确认收货成功！",true,"确认收货成功！",CodeConstant.SC_OK);
+            } else {
+                return fastReturn("确认收货失败！",false,"确认收货失败！",CodeConstant.UPDATE_FAIL);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ar;
+    }
 
     /**
      * @param request

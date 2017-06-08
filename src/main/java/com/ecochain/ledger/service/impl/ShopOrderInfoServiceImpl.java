@@ -694,6 +694,36 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
 
     @Override
     public boolean updateStateByOrderNo(PageData pd, String versionNo) throws Exception {
+        String kql_url = null;
+        pd.put("update_time", DateUtil.getCurrDateTime());
+        List<PageData> codeList = sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+        for (PageData mapObj : codeList) {
+            if ("QKL_URL".equals(mapObj.get("code_name"))) {
+                kql_url = mapObj.get("code_value").toString();
+            }
+        }
+        JSONObject json = null;
+        logger.info("====================测试代码========start================");
+        String jsonStr = HttpUtil.sendPostData("" + kql_url + "/get_new_key", "");
+        JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
+        PageData keyPd = new PageData();
+        keyPd.put("data", Base64.getBase64((JSON.toJSONString(pd))));
+        keyPd.put("publicKey", keyJsonObj.getJSONObject("result").getString("publicKey"));
+        keyPd.put("privateKey", keyJsonObj.getJSONObject("result").getString("privateKey"));
+        System.out.println("keyPd value is ------------->" + JSON.toJSONString(keyPd));
+        //2. 获取公钥签名
+        String signJsonObjStr = HttpUtil.sendPostData("" + kql_url + "/send_data_for_sign", JSON.toJSONString(keyPd));
+        JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
+        Map<String, Object> paramentMap = new HashMap<String, Object>();
+        paramentMap.put("publickey", keyJsonObj.getJSONObject("result").getString("publicKey"));
+        paramentMap.put("data", Base64.getBase64((JSON.toJSONString(pd))));
+        paramentMap.put("sign", signJsonObj.getString("result"));
+        String result1 = HttpUtil.sendPostData("" + kql_url + "/send_data_to_sys", JSON.toJSONString(paramentMap));
+        json = JSON.parseObject(result1);
+        if (StringUtil.isNotEmpty(json.getString("result"))) {
+            pd.put("confirm_receipt_hash", json.getString("result"));
+        }
+        logger.info("====================测试代码=======end=================");
         return (Integer) dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStateByOrderNo", pd) > 0;
     }
 
