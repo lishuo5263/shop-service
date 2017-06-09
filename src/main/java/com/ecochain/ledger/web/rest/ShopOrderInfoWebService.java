@@ -195,7 +195,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
                     shopOrderGood.get(0).setIntegralMoney(new BigDecimal(0));
                     shopOrderGood.get(0).setTradeHash(user.getString("seeds"));
                     shopOrderGood.get(0).setCreateTime(DateUtil.getCurrDateTime());
-                    shopOrderGood.get(0).setData(new StringBuffer(shopOrderGoods.substring(0,shopOrderGoods.length()-1)).append(",\"orderNo\":\""+shopOrderGood.get(0).getOrderNo()+"\"").append(",\"user_name\":\""+shopOrderGood.get(0).getUserName()+"\"").append(",\"goods_name\":\""+shopOrderGood.get(0).getGoodsName()+"\"").append(",\"bussType\":\"insertOrder\"}").toString());
+                    shopOrderGood.get(0).setData(new StringBuffer(shopOrderGoods.substring(0,shopOrderGoods.length()-1)).append(",\"orderNo\":\""+shopOrderGood.get(0).getOrderNo()+"\"").append(",\"userName\":\""+shopOrderGood.get(0).getUserName()+"\"").append(",\"goodsName\":\""+shopOrderGood.get(0).getGoodsName()+"\"").append(",\"bussType\":\"insertOrder\"}").toString());
                     result = this.shopOrderInfoService.insertShopOrder(shopOrderGood);
                     if (result.get(0).get("ErrorInsert") != null) {
                         return fastReturn(result, false, "订单生成失败，goodsId参数为空！", CodeConstant.PARAM_ERROR);
