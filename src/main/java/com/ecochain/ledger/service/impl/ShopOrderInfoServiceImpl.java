@@ -306,6 +306,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             shopOrderGoods.get(0).setGoodsSn(shopGoods.getGoodsSn());
             shopOrderGoods.get(0).setGoodsImg(shopGoods.getGoodsImg());
             shopOrderGoods.get(0).setGoodsName(shopGoods.getGoodsName());
+            shopOrderGoods.get(0).setCreateTime(DateUtil.getCurrDateTime());
             shopOrderGoods.get(0).setSupplierId(Integer.valueOf(shopGoods.getSupplierId()));
             totalMoney = totalMoney.add(shopOrderGoods.get(0).getPayPrice().multiply(new BigDecimal(shopOrderGoods.get(0).getGoodsNumber())));
         } else if ("2".equals(shopOrderGoods.get(0).getIsPromote())) { //与交易所购买图书交易
