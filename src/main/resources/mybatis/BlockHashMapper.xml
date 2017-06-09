@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BlockHashMapper" >
+  <resultMap id="BaseResultMap" type="BlockHashMapper" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="block_hash" property="blockHash" jdbcType="VARCHAR" />
+    <result column="block_height" property="blockHeight" jdbcType="INTEGER" />
+    <result column="block_create_time" property="blockCreateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, block_hash, block_height, block_create_time
+  </sql>
+  <select id="getMaxHeight" resultType="java.lang.Integer" >
+    select  max(block_height) from block_hash
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from block_hash
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into block_hash (block_hash, block_height, 
+      block_create_time)
+    values 
+    <foreach collection="com.ecochain.ledger.model.PageData" item="com.ecochain.ledger.model.PageData"  separator="," >
+      #{blockHash,jdbcType=VARCHAR}, #{blockHeight,jdbcType=INTEGER}, now())
+    </foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="BlockHashMapper" >
+    insert into block_hash
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="blockHash != null" >
+        block_hash,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="blockCreateTime != null" >
+        block_create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="blockHash != null" >
+        #{blockHash,jdbcType=VARCHAR},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=INTEGER},
+      </if>
+      <if test="blockCreateTime != null" >
+        #{blockCreateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  
+  <select id="getBlockList10" resultType="com.ecochain.ledger.model.PageData">
+    select * from block_hash limit 0,10
+  </select>
+</mapper>
