@@ -483,7 +483,11 @@ public class BlockDataWebService extends BaseWebService{
                 }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
                 }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no")+"，卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+"HLB");
+                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+"HLB");
+                }else if("transferAccount".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "转HLB，订单号："+jsonData.getString("flowno")+",对方账户："+jsonData.getString("revbankaccno")+",转账金额："+jsonData.getString("coin_amnt"));
+                }else if("currencyExchange".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "币种兑换，订单号："+jsonData.getString("flowno")+",兑换数量："+jsonData.getString("exchange_num")+"HLB,单价："+jsonData.getString("coin_rate")+"RMB,"+"兑换金额："+jsonData.getBigDecimal("rmb_amnt"));
                 }else{
                     continue;
                 }
