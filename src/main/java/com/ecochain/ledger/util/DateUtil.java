@@ -260,13 +260,19 @@ public class DateUtil {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = simpleDateFormat.parse(s);
         long ts = date.getTime();
-        res = String.valueOf(ts);
+        res = String.valueOf(ts).substring(0, 10);
         return res;
     }
     public static void main(String[] args) {
     	System.out.println(getDays());
     	System.out.println(getAfterDayWeek("3"));
     	System.out.println(getTime());
+    	try {
+            System.out.println(stampToDate("1496990550"));
+            System.out.println(dateToStamp("2017-06-09 14:42:30"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     

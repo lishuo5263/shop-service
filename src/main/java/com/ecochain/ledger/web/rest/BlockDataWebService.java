@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import com.ecochain.ledger.util.AjaxResponse;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpTool;
-import com.ecochain.ledger.util.JedisUtil;
 import com.ecochain.ledger.util.Logger;
 /**
  * 账户控制类
@@ -494,6 +494,9 @@ public class BlockDataWebService extends BaseWebService{
                 }else{
                     continue;
                 }
+                if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
+                    jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
+                }
                 tradeJSON.put("data", jsonData);
             }
             data.put("list", blockData);
@@ -594,7 +597,7 @@ public class BlockDataWebService extends BaseWebService{
                 }
                 if("insertOrder".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+"HLB,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+"HLB，订单状态：待支付");
-                    jsonData.put("create_time", jsonData.getString("createtime"));
+                    jsonData.put("create_time", jsonData.getString("createTime"));
                 }else if("payNow".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+"HLB,订单状态：已支付");
                 }else if("deliverGoods".equals(jsonData.getString("bussType"))){
@@ -613,7 +616,9 @@ public class BlockDataWebService extends BaseWebService{
                 }else{
                     continue;
                 }
-                
+                if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
+                    jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
+                }
                 dataArray.add(jsonData);
             }
             blockDetail.getJSONObject("result").put("qtx", dataArray);
