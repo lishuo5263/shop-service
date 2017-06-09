@@ -475,7 +475,7 @@ public class BlockDataWebService extends BaseWebService{
                 }
                 if("insertOrder".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+"HLB,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+"HLB，订单状态：待支付");
-                    jsonData.put("create_time", jsonData.getString("createtime"));
+                    jsonData.put("create_time", jsonData.getString("createTime"));
                 }else if("payNow".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+"HLB,订单状态：已支付");
                 }else if("deliverGoods".equals(jsonData.getString("bussType"))){
