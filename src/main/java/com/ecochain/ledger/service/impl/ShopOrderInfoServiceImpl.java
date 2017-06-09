@@ -373,7 +373,6 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         shopOrderGoods.get(0).setMobile(pd.getString("mobile"));
         shopOrderGoods.get(0).setCity(pd.getString("city"));
         shopOrderGoods.get(0).setArea(pd.getString("area"));
-        shopOrderGoods.get(0).setCreateTime(DateUtil.getCurrDateTime());
         this.shopOrderInfoMapper.insertShopOrder(shopOrderGoods.get(0));//创建订单信息
         updateOrderIdByOrderNo(shopOrderGoods.get(0).getOrderNo(), "");
         BlockDataHash blockDataHash =new BlockDataHash();
