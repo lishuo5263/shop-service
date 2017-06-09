@@ -25,6 +25,7 @@ import com.ecochain.ledger.base.BaseWebService;
 import com.ecochain.ledger.constants.CodeConstant;
 import com.ecochain.ledger.constants.Constant;
 import com.ecochain.ledger.model.PageData;
+import com.ecochain.ledger.service.BlockHashService;
 import com.ecochain.ledger.service.SysGenCodeService;
 import com.ecochain.ledger.util.AjaxResponse;
 import com.ecochain.ledger.util.Base64;
@@ -45,6 +46,8 @@ public class BlockDataWebService extends BaseWebService{
     
     @Autowired
     private SysGenCodeService sysGenCodeService;
+    @Autowired
+    private BlockHashService blockHashService;
 
 
     /**
@@ -523,7 +526,9 @@ public class BlockDataWebService extends BaseWebService{
         AjaxResponse ar = new AjaxResponse();
         Map<String,Object> data = new HashMap<String, Object>();
         try {
-            List<JSONObject> blockList = (List<JSONObject>)JedisUtil.get("blockList");
+//            String object = (String)JedisUtil.get("blockList");
+//            List<JSONObject> blockList = (List<JSONObject>)JedisUtil.get("blockList");
+            List<PageData> blockList = blockHashService.getBlockList10();
             data.put("blockList", blockList);
             ar.setData(data);
             ar.setSuccess(true);
@@ -577,12 +582,21 @@ public class BlockDataWebService extends BaseWebService{
                 String result1 = HttpTool.doPost(kql_url+"/get_data_from_sys", dataHash);
                 JSONObject tradeJson = JSONObject.parseObject(result1);
                 String dataStr = Base64.getFromBase64(tradeJson.getJSONObject("result").getString("data"));
-                JSONObject jsonData = JSONObject.parseObject(dataStr);
+                JSONObject jsonData = null;
+                try {
+                    jsonData = JSONObject.parseObject(dataStr);
+                } catch (Exception e) {
+                    System.out.println("不是一个json字符串");
+                    continue;
+                }
+                if(jsonData==null){
+                    continue;
+                }
                 if("insertOrder".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goods_name")+",数量："+jsonData.getString("goodsNumber")+",金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+"，订单状态：待支付");
+                    jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+"HLB,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+"HLB，订单状态：待支付");
                     jsonData.put("create_time", jsonData.getString("createtime"));
                 }else if("payNow".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",金额："+jsonData.get("order_amount")+",订单状态：已支付");
+                    jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+"HLB,订单状态：已支付");
                 }else if("deliverGoods".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "发货，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
                     jsonData.put("create_time", jsonData.getString("createtime"));
@@ -591,8 +605,15 @@ public class BlockDataWebService extends BaseWebService{
                 }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
                 }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no"));
+                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+"HLB");
+                }else if("transferAccount".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "转HLB，订单号："+jsonData.getString("flowno")+",对方账户："+jsonData.getString("revbankaccno")+",转账金额："+jsonData.getString("coin_amnt"));
+                }else if("currencyExchange".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "币种兑换，订单号："+jsonData.getString("flowno")+",兑换数量："+jsonData.getString("exchange_num")+"HLB,单价："+jsonData.getString("coin_rate")+"RMB,"+"兑换金额："+jsonData.getBigDecimal("rmb_amnt"));
+                }else{
+                    continue;
                 }
+                
                 dataArray.add(jsonData);
             }
             blockDetail.getJSONObject("result").put("qtx", dataArray);
