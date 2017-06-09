@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -460,14 +460,17 @@ public class BlockDataWebService extends BaseWebService{
             String result = HttpTool.doPost(kql_url+"/GetDataList", rows);
             JSONObject blockData = JSONObject.parseObject(result);
             JSONArray blockArray = blockData.getJSONArray("result");
-            for(Object trade:blockArray){
-                JSONObject tradeJSON = (JSONObject)trade;
+            List<JSONObject> removelist = new ArrayList<JSONObject>();
+            for(int i = 0;i<blockArray.size();i++){
+//            for(Object trade:blockArray){
+                JSONObject tradeJSON = (JSONObject)blockArray.get(i);
                 String dataStr = Base64.getFromBase64(tradeJSON.getString("data"));
                 JSONObject jsonData = null;
                 try {
                     jsonData = JSONObject.parseObject(dataStr);
                 } catch (Exception e) {
                     System.out.println("不是一个json字符串");
+                    removelist.add(tradeJSON);
                     continue;
                 }
                 if(jsonData==null){
@@ -494,12 +497,18 @@ public class BlockDataWebService extends BaseWebService{
                 }else{
                     continue;
                 }
+                
                 if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
                     jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
                 }
                 tradeJSON.put("data", jsonData);
             }
-            data.put("list", blockData);
+            blockArray.removeAll(removelist);
+            if(blockArray.size()>0){
+                data.put("list", blockData);
+            }else{
+                data.put("list", null);
+            }
             ar.setData(data);
             ar.setSuccess(true);
             ar.setMessage("查询成功！");
