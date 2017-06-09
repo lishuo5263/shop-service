@@ -143,7 +143,7 @@ public class PayWebService extends BaseWebService{
             pd.put("user_id", String.valueOf(user.get("id")));
             PageData shopOrder = shopOrderInfoService.getShopOrderByOrderNo(pd, Constant.VERSION_NO);
             PageData supplierInfo = shopOrderGoodsService.getSupplierInfoByOrderNo(pd.getString("order_no"));
-            String content = "order_no="+pd.getString("order_no")+"&order_amount="+shopOrder.getString("order_amount")+"&goods_name="+pd.getString("goods_name")+"&supplier_name="+supplierInfo.getString("supplier_name");
+            String content = "order_no="+pd.getString("order_no")+"&order_amount="+String.valueOf(shopOrder.get("order_amount"))+"&goods_name="+pd.getString("goods_name")+"&supplier_name="+supplierInfo.getString("supplier_name");
             OutputStream out = response.getOutputStream();
             QRCodeUtil.encode(content, imgPath, out, false);
         } catch (Exception e) {
