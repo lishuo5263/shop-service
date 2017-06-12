@@ -498,8 +498,7 @@ public class BlockDataWebService extends BaseWebService{
                 }else{
                     continue;
                 }
-               
-                
+                logger.info("-------------------bussType="+jsonData.getString("bussType"));
                 if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
                     jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
                 }
