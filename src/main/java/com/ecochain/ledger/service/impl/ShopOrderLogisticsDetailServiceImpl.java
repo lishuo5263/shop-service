@@ -112,7 +112,9 @@ public class ShopOrderLogisticsDetailServiceImpl implements ShopOrderLogisticsDe
         shopOrderLogisticsDetail.setLogisticsDetailHash(pd.getString("logistics_detail_hash"));
         shopOrderLogisticsDetail.setCreateTime(DateUtil.fomatDateDetail(pd.getString("create_time")));
         this.shopOrderLogisticsDetailService.insertSelective(shopOrderLogisticsDetail);
-        this.shopOrderInfoMapper.updateOrderStatusByOrderNo2(pd.get("shop_order_no").toString());
+        if("transferLogistics".equals(pd.getString("type"))){
+            this.shopOrderInfoMapper.updateOrderStatusByOrderNo2(pd.getString("shop_order_no"));
+        }
         return true;
     }
 }
