@@ -153,7 +153,6 @@ public class ShopOrderInfoWebService extends BaseWebService {
             shopOrderGood = objectMapper.readValue(shopOrderGoods, javaType);
             String userstr = SessionUtil.getAttibuteForUser(Base64.getFromBase64(shopOrderGood.get(0).getCsessionid()));
             JSONObject user = JSONObject.parseObject(userstr);
-            shopOrderGood.get(0).setCsessionid("");//add by zhangchunming
             if(user == null || !user.containsKey("seeds")){
                 return fastReturn(null, false, "下单失败，登录超时，请重新登陆！", CodeConstant.UNLOGIN);
             }
@@ -199,6 +198,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
                     shopOrderGood.get(0).setIntegralMoney(new BigDecimal(0));
                     shopOrderGood.get(0).setTradeHash(user.getString("seeds"));
                     shopOrderGood.get(0).setAddTime(DateUtil.getCurrDateTime());
+                    shopOrderGood.get(0).setCsessionid("");//add by zhangchunming
                     shopOrderGood.get(0).setData(new StringBuffer(shopOrderGoods.substring(0,shopOrderGoods.length()-1)).append(",\"orderNo\":\""+shopOrderGood.get(0).getOrderNo()+"\"").append(",\"userName\":\""+shopOrderGood.get(0).getUserName()+"\"").append(",\"addTime\":\""+shopOrderGood.get(0).getAddTime()+"\"").append(",\"goodsName\":\""+shopOrderGood.get(0).getGoodsName()+"\"").append(",\"bussType\":\"insertOrder\"}").toString());
                     result = this.shopOrderInfoService.insertShopOrder(shopOrderGood);
                     if (result.get(0).get("ErrorInsert") != null) {
