@@ -212,7 +212,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
                     }
                 } /*else if ("1".equals(shopOrderGood.get(0).getIsPromote())) {  //促销商品下单
                     if (shopOrderGood.get(0).getGoodsNumber() > 1) {
-                        return fastReturn(null, false, "订单生成失败，秒杀商品每次只能购买1件！", CodeConstant.ERROR_NO_REPEATSECKILLGOODS);
+                        return fastReturn(null, false, "订单生成失败，秒杀商品每次只能购买11件！", CodeConstant.ERROR_NO_REPEATSECKILLGOODS);
                     }
                     logger.info("--------商城秒殺下单参数shopOrderGood：" + shopOrderGoods);
                     List<Map<String, Object>> result = new ArrayList();
