@@ -150,6 +150,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
             shopOrderGood = objectMapper.readValue(shopOrderGoods, javaType);
             String userstr = SessionUtil.getAttibuteForUser(Base64.getFromBase64(shopOrderGood.get(0).getCsessionid()));
             JSONObject user = JSONObject.parseObject(userstr);
+            shopOrderGood.get(0).setCsessionid("");//add by zhangchunming
             if(user == null || !user.containsKey("seeds")){
                 return fastReturn(null, false, "下单失败，登录超时，请重新登陆！", CodeConstant.UNLOGIN);
             }
@@ -886,6 +887,8 @@ public class ShopOrderInfoWebService extends BaseWebService {
             JSONObject user = JSONObject.parseObject(userstr);
             PageData pd = new PageData();
             pd = this.getPageData();
+            
+            pd.remove("CSESSIONID");//add by zhangchunming
             pd.put("user_id", user.getInteger("id"));
             String order_no = pd.getString("order_no");
             if (StringUtil.isEmpty(order_no)) {
@@ -1443,6 +1446,7 @@ public class ShopOrderInfoWebService extends BaseWebService {
         try {
             String userstr = SessionUtil.getAttibuteForUser(RequestUtils.getRequestValue(CookieConstant.CSESSIONID, request));
             JSONObject user = JSONObject.parseObject(userstr);
+            pd.remove("CSESSIONID");
             pd.put("user_name", user.getString("user_name"));
             pd.put("user_id", String.valueOf(user.get("id")));
             pd.put("seeds", user.getString("seeds"));
