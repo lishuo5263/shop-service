@@ -13,7 +13,7 @@ public interface BlockHashService {
      * @throws Exception
      * @return: boolean
      */
-    boolean insert(List<PageData> pd) throws Exception;
+    boolean insert(List<PageData> blockList) throws Exception;
     /**
      * @describe:huoqu
      * @author: zhangchunming

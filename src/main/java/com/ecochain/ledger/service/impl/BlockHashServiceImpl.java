@@ -18,7 +18,9 @@ public class BlockHashServiceImpl implements BlockHashService {
     private DaoSupport dao;
     
     @Override
-    public boolean insert(List<PageData> pd) throws Exception {
+    public boolean insert(List<PageData> blockList) throws Exception {
+        PageData pd = new PageData();
+        pd.put("blockList", blockList);
         return (Integer)dao.save("BlockHashMapper.insert", pd)>0;
     }
 
