@@ -11,15 +11,15 @@
     delete from block_hash
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="java.util.List" >
-    insert into block_hash (block_hash, block_height, 
+  <insert id="insert" parameterType="com.ecochain.ledger.model.PageData" >
+    insert into block_hash (block_hash, block_height,trade_num, 
       block_create_time)
     values 
-    <foreach collection="com.ecochain.ledger.model.PageData" item="com.ecochain.ledger.model.PageData"  separator="," >
-      #{blockHash,jdbcType=VARCHAR}, #{blockHeight,jdbcType=INTEGER}, now())
+    <foreach collection="blockList" item="item"  separator="," >
+      (#{item.block_hash,jdbcType=VARCHAR}, #{item.block_height,jdbcType=INTEGER}, #{item.trade_num,jdbcType=INTEGER},now())
     </foreach>
   </insert>
   <select id="getBlockList10" resultType="com.ecochain.ledger.model.PageData">
-    select * from block_hash limit 0,10
+    select * from block_hash order by block_height desc limit 0,10 
   </select>
 </mapper>

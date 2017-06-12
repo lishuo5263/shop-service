@@ -72,7 +72,7 @@ public class AccHashSummaryTask {
                     }*/
                 }
             }
-            if(tradeHashlist != null && tradeHashlist.size() > 0){//商城兑换
+            if(tradeHashlist != null && tradeHashlist.size() > 0){//商城支付
                 PageData pd = new PageData();
                 pd.put("hashList", tradeHashlist);
                 pd.put("shopOrderList", shopOrderList);

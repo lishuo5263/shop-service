@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
@@ -18,7 +19,6 @@ import com.ecochain.ledger.service.BlockHashService;
 import com.ecochain.ledger.service.ShopOrderInfoService;
 import com.ecochain.ledger.service.SysGenCodeService;
 import com.ecochain.ledger.util.HttpTool;
-import com.ecochain.ledger.util.JedisUtil;
 
 /**
  * Created by Lisandro on 2017/5/17.
@@ -46,7 +46,7 @@ public class BlockListTask {
 
     
 
-//    @Scheduled(fixedDelay=5000)
+    @Scheduled(fixedDelay=5000)
     public void scheduler()throws  Exception {
         try {
             String kql_url =null;
@@ -74,11 +74,14 @@ public class BlockListTask {
                     break;
                 }
                 try {
-                    if(blockDetail.getJSONObject("result").getJSONArray("qtx").size()>0&&blockDetail.getJSONObject("result").getInteger("blockHeight")>maxHeight){
-                        PageData pd = new PageData();
-                        pd.put("block_hash", blockHash);
-                        pd.put("block_height", blockDetail.getJSONObject("result").getInteger("blockHeight"));
-                        blockList.add(pd);
+                    if(blockDetail.getJSONObject("result").getJSONArray("qtx").size()>0){
+                        if(maxHeight == null||blockDetail.getJSONObject("result").getInteger("blockHeight")>maxHeight){
+                            PageData pd = new PageData();
+                            pd.put("block_hash", blockJson.getString("blockHash"));
+                            pd.put("trade_num", blockDetail.getJSONObject("result").getJSONArray("qtx").size());
+                            pd.put("block_height", blockDetail.getJSONObject("result").getInteger("blockHeight"));
+                            blockList.add(pd);
+                        }
                     }
                 } catch (Exception e) {
                     System.out.println("--------GetBlockList------查询区块详细的接口未更新--------------");
