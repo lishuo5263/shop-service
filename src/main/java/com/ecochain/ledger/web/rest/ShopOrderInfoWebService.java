@@ -12,9 +12,11 @@ import com.ecochain.ledger.service.*;
 import com.ecochain.ledger.util.*;
 import com.ecochain.ledger.util.Base64;
 import com.github.pagehelper.PageInfo;
+
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -1645,8 +1648,10 @@ public class ShopOrderInfoWebService extends BaseWebService {
             }
             List<PageData> logisticsList = shopOrderLogisticsService.getLogistics(pd);
             String orderStatus = shopOrderInfoService.getOrderStatusByOrderNo(pd.getString("shop_order_no"));
+            String state = shopOrderGoodsService.getStateByOrderNo(pd.getString("shop_order_no"));
             data.put("list", logisticsList);
             data.put("orderStatus", orderStatus);
+            data.put("state", state);
             ar.setData(data);
             ar.setSuccess(true);
             ar.setMessage("查询成功！");
@@ -1768,6 +1773,6 @@ public class ShopOrderInfoWebService extends BaseWebService {
     }*/
 
     public static void main(String[] args) {
-        System.out.println(Integer.valueOf("2147483647"));
+        System.out.println("YjczODgzYTk2OGZkNGFjZmEwNzRmMWY4ZjI0NDkwOTI=".length());
     }
 }
