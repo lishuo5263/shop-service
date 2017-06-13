@@ -66,7 +66,7 @@ public class BlockListTask {
             List<PageData> blockList = new ArrayList<PageData>();
             for(Object block :blockArray ){
                 JSONObject blockJson = (JSONObject)block;
-                String blockHash = "\""+blockJson.getString("blockHash")+"\"";
+                /*String blockHash = "\""+blockJson.getString("blockHash")+"\"";
                 String result1 = HttpTool.doPost(kql_url+"/GetBlockDetail", blockHash);
                 JSONObject blockDetail = JSONObject.parseObject(result1);
                 
@@ -87,6 +87,13 @@ public class BlockListTask {
                     System.out.println("--------GetBlockList------查询区块详细的接口未更新--------------");
                     break;
 //                e.printStackTrace();
+                }*/
+                if(maxHeight == null||blockJson.getInteger("blockHeight")>maxHeight){
+                    PageData pd = new PageData();
+                    pd.put("block_hash", blockJson.getString("blockHash"));
+                    pd.put("trade_num", blockJson.getInteger("records"));
+                    pd.put("block_height", blockJson.getInteger("blockHeight"));
+                    blockList.add(pd);
                 }
             }
             if(blockList.size()>0){
