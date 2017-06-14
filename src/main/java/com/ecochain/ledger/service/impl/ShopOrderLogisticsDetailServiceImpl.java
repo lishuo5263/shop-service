@@ -114,6 +114,9 @@ public class ShopOrderLogisticsDetailServiceImpl implements ShopOrderLogisticsDe
         this.shopOrderLogisticsDetailService.insertSelective(shopOrderLogisticsDetail);
         if("transferLogistics".equals(pd.getString("type"))){
             this.shopOrderInfoMapper.updateOrderStatusByOrderNo2(pd.getString("shop_order_no"));
+        }else{
+            pd.put("order_status","8");
+            this.shopOrderInfoMapper.updateOrderStatusByOrderNo(pd);
         }
         return true;
     }
