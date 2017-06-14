@@ -16,6 +16,7 @@ import com.ecochain.ledger.constants.Constant;
 import com.ecochain.ledger.model.PageData;
 import com.ecochain.ledger.service.BlockDataHashService;
 import com.ecochain.ledger.service.BlockHashService;
+import com.ecochain.ledger.service.DataHashService;
 import com.ecochain.ledger.service.ShopOrderInfoService;
 import com.ecochain.ledger.service.SysGenCodeService;
 import com.ecochain.ledger.util.HttpTool;
@@ -43,11 +44,13 @@ public class BlockListTask {
     private SysGenCodeService sysGenCodeService;
     @Autowired
     private BlockHashService blockHashService;
+    @Autowired
+    private DataHashService dataHashService;
 
     
 
     @Scheduled(fixedDelay=5000)
-    public void scheduler()throws  Exception {
+    public void getBlockList()throws  Exception {
         try {
             String kql_url =null;
             List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
@@ -66,29 +69,7 @@ public class BlockListTask {
             List<PageData> blockList = new ArrayList<PageData>();
             for(Object block :blockArray ){
                 JSONObject blockJson = (JSONObject)block;
-                /*String blockHash = "\""+blockJson.getString("blockHash")+"\"";
-                String result1 = HttpTool.doPost(kql_url+"/GetBlockDetail", blockHash);
-                JSONObject blockDetail = JSONObject.parseObject(result1);
-                
-                if(blockList.size()>=10){
-                    break;
-                }
-                try {
-                    if(blockDetail.getJSONObject("result").getJSONArray("qtx").size()>0){
-                        if(maxHeight == null||blockDetail.getJSONObject("result").getInteger("blockHeight")>maxHeight){
-                            PageData pd = new PageData();
-                            pd.put("block_hash", blockJson.getString("blockHash"));
-                            pd.put("trade_num", blockDetail.getJSONObject("result").getJSONArray("qtx").size());
-                            pd.put("block_height", blockDetail.getJSONObject("result").getInteger("blockHeight"));
-                            blockList.add(pd);
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println("--------GetBlockList------查询区块详细的接口未更新--------------");
-                    break;
-//                e.printStackTrace();
-                }*/
-                if(maxHeight == null||blockJson.getInteger("blockHeight")>maxHeight){
+                if((maxHeight == null||blockJson.getInteger("blockHeight")>maxHeight)&&blockJson.getInteger("records")>0){
                     PageData pd = new PageData();
                     pd.put("block_hash", blockJson.getString("blockHash"));
                     pd.put("trade_num", blockJson.getInteger("records"));
@@ -98,8 +79,54 @@ public class BlockListTask {
             }
             if(blockList.size()>0){
                 blockHashService.insert(blockList);
-//                JedisUtil.set("blockList", blockList, 60*30);
-//                List<JSONObject> block = (List<JSONObject>)JedisUtil.get("blockList");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Scheduled(fixedDelay=5000)
+    public void getDataList()throws  Exception {
+        try {
+            String kql_url =null;
+            List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+            for(PageData mapObj:codeList){
+                if("QKL_URL".equals(mapObj.get("code_name"))){
+                    kql_url = mapObj.get("code_value").toString();
+                }
+            }
+            String rows = "40";
+            String result = HttpTool.doPost(kql_url+"/GetDataList", rows);
+            
+            List<String> hashList50 = dataHashService.getHashList50();
+            
+            JSONObject dataObj = JSONObject.parseObject(result);
+            JSONArray dataArray  = dataObj.getJSONArray("result");
+            List<PageData> dataList = new ArrayList<PageData>();
+            if(hashList50 != null&&hashList50.size()>0){
+                for(int i = dataArray.size()-1 ; i >= 0 ; i-- ){
+                    JSONObject dataJson = (JSONObject)dataArray.get(i);
+                    if(!hashList50.contains(dataJson.getString("hash"))){
+                        PageData pd = new PageData(); 
+                        pd.put("hash", dataJson.getString("hash"));
+                        pd.put("data", dataJson.getString("data"));
+                        dataList.add(pd);
+                    }
+                }
+            }else{
+                for(int i = dataArray.size()-1 ; i >= 0 ; i-- ){
+                    JSONObject dataJson = (JSONObject)dataArray.get(i);
+                    PageData pd = new PageData(); 
+                    pd.put("hash", dataJson.getString("hash"));
+                    pd.put("data", dataJson.getString("data"));
+                    dataList.add(pd);
+                }
+            }
+            
+            if(dataList.size()>0){
+                PageData pd = new PageData();
+                pd.put("dataList", dataList);
+                dataHashService.insert(pd);
             }
         } catch (Exception e) {
             e.printStackTrace();

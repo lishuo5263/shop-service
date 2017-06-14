@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DataHashMapper" >
+  <sql id="Base_Column_List" >
+    id, hash, data, create_time
+  </sql>
+  <insert id="insert" parameterType="com.ecochain.ledger.model.PageData" >
+    insert into data_hash (hash, data, create_time)
+    values 
+    <foreach collection="dataList" item="item"  separator="," >
+      (#{item.hash,jdbcType=VARCHAR}, #{item.data,jdbcType=INTEGER}, now())
+    </foreach>
+  </insert>
+  <select id="getHashList50" resultType="java.lang.String">
+    select hash from data_hash order by id desc limit 0,50 
+  </select>
+  <select id="getDataList" resultType="com.ecochain.ledger.model.PageData" parameterType="java.lang.Integer">
+    select * from data_hash order by id desc limit 0,#{rows} 
+  </select>
+  
+</mapper>

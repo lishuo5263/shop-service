@@ -130,7 +130,7 @@ public class PayWebService extends BaseWebService{
     @ApiOperation(nickname = "生成支付二维码", value = "生成支付二维码", notes = "生成支付二维码")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "CSESSIONID", value = "会话token", required = true, paramType = "query", dataType = "String"),
-        @ApiImplicitParam(name = "order_no", value = "订单号", required = false, paramType = "query", dataType = "String"),
+        @ApiImplicitParam(name = "order_no", value = "订单号", required = true, paramType = "query", dataType = "String"),
         @ApiImplicitParam(name = "goods_name", value = "商品名称", required = false, paramType = "query", dataType = "String")
     })
     public void generatePayQRCode(HttpServletRequest request, HttpServletResponse response){
@@ -143,7 +143,8 @@ public class PayWebService extends BaseWebService{
             pd.put("user_id", String.valueOf(user.get("id")));
             PageData shopOrder = shopOrderInfoService.getShopOrderByOrderNo(pd, Constant.VERSION_NO);
             PageData supplierInfo = shopOrderGoodsService.getSupplierInfoByOrderNo(pd.getString("order_no"));
-            String content = "order_no="+pd.getString("order_no")+"&order_amount="+String.valueOf(shopOrder.get("order_amount"))+"&goods_name="+pd.getString("goods_name")+"&supplier_name="+supplierInfo.getString("supplier_name");
+            String goodsName = shopOrderGoodsService.getOneGoodsNameByOrderNo(pd.getString("order_no"));
+            String content = "order_no="+pd.getString("order_no")+"&order_amount="+String.valueOf(shopOrder.get("order_amount"))+"&goods_name="+goodsName+"&supplier_name="+supplierInfo.getString("supplier_name");
             OutputStream out = response.getOutputStream();
             QRCodeUtil.encode(content, imgPath, out, false);
         } catch (Exception e) {
