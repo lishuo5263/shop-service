@@ -785,7 +785,7 @@
         order_status = #{order_status}
       </if>
     </set>
-    where order_no = #{order_no}
+    where order_no = #{shop_order_no}
   </update>
   <update id="updateShopOrderStatusByHash" parameterType="com.ecochain.ledger.model.PageData">
     update shop_order_info 

@@ -48,7 +48,7 @@ public class ShopOrderLogisticsDetailServiceImpl implements ShopOrderLogisticsDe
     }
 
     @Override
-    public List<Map<String,Object>> findLogisticsInfoByNo2(String logisticsNo) {
+    public List<Map<String, Object>> findLogisticsInfoByNo2(String logisticsNo) {
         return shopOrderLogisticsDetailMapper.findLogisticsInfoByNo2(logisticsNo);
     }
 
@@ -61,7 +61,7 @@ public class ShopOrderLogisticsDetailServiceImpl implements ShopOrderLogisticsDe
     public boolean transferLogistics(PageData pd, String versionNo) throws Exception {
         String kql_url = null;
         pd.put("create_time", DateUtil.getCurrDateTime());
-        if("transferLogistics".equals(pd.getString("type"))){
+        if ("transferLogistics".equals(pd.getString("type"))) {
             pd.put("order_status", "11");
         }
         List<PageData> codeList = sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
@@ -97,7 +97,7 @@ public class ShopOrderLogisticsDetailServiceImpl implements ShopOrderLogisticsDe
         shopOrderLogisticsDetail.setLogisticsDetailHash(pd.getString("logistics_detail_hash"));
         shopOrderLogisticsDetail.setCreateTime(DateUtil.fomatDateDetail(pd.getString("create_time")));
         this.shopOrderLogisticsDetailService.insertSelective(shopOrderLogisticsDetail);
-        if("transferLogistics".equals(pd.getString("type"))){
+        if ("transferLogistics".equals(pd.getString("type"))) {
             this.shopOrderInfoMapper.updateOrderStatusByOrderNo2(pd.getString("shop_order_no"));
         }
         logger.info("====================测试代码=======end=================");
@@ -105,19 +105,14 @@ public class ShopOrderLogisticsDetailServiceImpl implements ShopOrderLogisticsDe
     }
 
     @Override
-    public boolean transferLogisticsWithOutBlockChain(PageData pd, String versionNo) throws Exception {
+    public boolean transferLogisticsWithOutBlockChain(PageData pd, String versionNo) throws Exception {   //平台同步国内、境外物流信息
         ShopOrderLogisticsDetail shopOrderLogisticsDetail = new ShopOrderLogisticsDetail();
         shopOrderLogisticsDetail.setLogisticsNo(pd.getString("logistics_no"));
         shopOrderLogisticsDetail.setLogisticsMsg(pd.getString("logistics_msg"));
         shopOrderLogisticsDetail.setLogisticsDetailHash(pd.getString("logistics_detail_hash"));
         shopOrderLogisticsDetail.setCreateTime(DateUtil.fomatDateDetail(pd.getString("create_time")));
         this.shopOrderLogisticsDetailService.insertSelective(shopOrderLogisticsDetail);
-        if("transferLogistics".equals(pd.getString("type"))){
-            this.shopOrderInfoMapper.updateOrderStatusByOrderNo2(pd.getString("shop_order_no"));
-        }else{
-            pd.put("order_status","8");
-            this.shopOrderInfoMapper.updateOrderStatusByOrderNo(pd);
-        }
+        this.shopOrderInfoMapper.updateOrderStatusByOrderNo(pd);
         return true;
     }
 }

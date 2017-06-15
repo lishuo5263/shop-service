@@ -95,11 +95,14 @@ public class ShopOrderLogisticsDetailWebService extends BaseWebService {
             @ApiImplicitParam(name = "create_time", value = "创建时间", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "hash", value = "hash", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "shop_order_no", value = "订单号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "type", value = "转货类型", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "flag", value = "信息同步类型", required = true, paramType = "query", dataType = "String"),
     })
     public AjaxResponse transferLogisticsWithOutBlockChain(HttpServletRequest request, Page page) {
         PageData pd = new PageData();
         pd = this.getPageData();
         page.setPd(pd);
+        logger.info("同步物流发货信息为---------------->>>>>>>" +pd.toString()+"----------------<<<<<<<<<");
         AjaxResponse ar = new AjaxResponse();
         try {
             if (!StringUtil.isNotEmpty(pd.getString("logistics_no")) && !StringUtil.isNotEmpty(pd.getString("logistics_msg")) && !StringUtil.isNotEmpty(pd.getString("hash")) && !StringUtil.isNotEmpty(pd.getString("create_time")) && !StringUtil.isNotEmpty(pd.getString("shop_order_no")) ) {
