@@ -584,7 +584,8 @@ public class BlockDataWebService extends BaseWebService{
                 }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "编辑了物流信息，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
                 }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "确认收货了，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+" HLC");
+//                    jsonData.put("describe", "确认收货了，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+" HLC");
+                    jsonData.put("describe", "确认收货了，订单号："+jsonData.getString("shop_order_no"));
                 }else if("transferAccount".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "转HLC，订单号："+jsonData.getString("flowno")+",对方账户："+jsonData.getString("revbankaccno")+",转账金额："+jsonData.getString("coin_amnt")+" HLC");
                 }else if("currencyExchange".equals(jsonData.getString("bussType"))){
