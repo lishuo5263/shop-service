@@ -52,6 +52,7 @@ public class BlockListTask {
     @Scheduled(fixedDelay=5000)
     public void getBlockList()throws  Exception {
         try {
+            logger.info("------BlockListTask.getBlockList--------同步blockList-------start-----------");
             String kql_url =null;
             List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
             for(PageData mapObj:codeList){
@@ -59,11 +60,12 @@ public class BlockListTask {
                     kql_url = mapObj.get("code_value").toString();
                 }
             }
+            logger.info("------BlockListTask.getBlockList--------kql_url="+kql_url);
             String rows = "100";
             String result = HttpTool.doPost(kql_url+"/GetBlockList", rows);
             
             Integer maxHeight = blockHashService.getMaxHeight();
-            
+            logger.info("------BlockListTask.getBlockList--------maxHeight="+maxHeight);
             JSONObject blockData = JSONObject.parseObject(result);
             JSONArray blockArray  = blockData.getJSONArray("result");
             List<PageData> blockList = new ArrayList<PageData>();
@@ -79,6 +81,7 @@ public class BlockListTask {
             }
             if(blockList.size()>0){
                 blockHashService.insert(blockList);
+                logger.info("------BlockListTask.getBlockList--------同步blockList-------end--------blockList="+blockList.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,6 +91,7 @@ public class BlockListTask {
     @Scheduled(fixedDelay=5000)
     public void getDataList()throws  Exception {
         try {
+            logger.info("------BlockListTask.getDataList--------同步dataList-------start-----------");
             String kql_url =null;
             List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
             for(PageData mapObj:codeList){
@@ -95,6 +99,7 @@ public class BlockListTask {
                     kql_url = mapObj.get("code_value").toString();
                 }
             }
+            logger.info("------BlockListTask.getDataList--------kql_url="+kql_url);
             String rows = "40";
             String result = HttpTool.doPost(kql_url+"/GetDataList", rows);
             
@@ -127,6 +132,7 @@ public class BlockListTask {
                 PageData pd = new PageData();
                 pd.put("dataList", dataList);
                 dataHashService.insert(pd);
+                logger.info("------BlockListTask.getDataList--------同步dataList-------end-----dataList="+dataList.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -571,26 +572,26 @@ public class BlockDataWebService extends BaseWebService{
                     continue;
                 }
                 if("insertOrder".equals(jsonData.getString("bussType"))){
-//                    jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
+                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
                     jsonData.put("create_time", jsonData.getString("addTime"));
                     jsonData.put("user_name", jsonData.getString("userName"));
-                }/*else if("payNow".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+" HLC,订单状态：已支付");
+                }else if("payNow".equals(jsonData.getString("bussType"))){
+                    jsonData.put("describe", "进行了商品支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+" HLC,订单状态：已支付");
                 }else if("deliverGoods".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "发货，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
+                    jsonData.put("describe", "将商品发货了，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
                 }else if("innerTransferLogisticss".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "国内物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                    jsonData.put("describe", "编辑了物流信息，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
                 }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                    jsonData.put("describe", "编辑了物流信息，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
                 }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+" HLC");
+                    jsonData.put("describe", "确认收货了，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+" HLC");
                 }else if("transferAccount".equals(jsonData.getString("bussType"))){
                     jsonData.put("describe", "转HLC，订单号："+jsonData.getString("flowno")+",对方账户："+jsonData.getString("revbankaccno")+",转账金额："+jsonData.getString("coin_amnt")+" HLC");
                 }else if("currencyExchange".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "币种兑换，订单号："+jsonData.getString("flowno")+",兑换数量："+jsonData.getString("exchange_num")+" HLC,单价："+jsonData.getString("coin_rate")+" RMB,兑换金额："+jsonData.getBigDecimal("rmb_amnt")+" RMB");
+                    jsonData.put("describe", "进行了币种兑换，订单号："+jsonData.getString("flowno")+",兑换数量："+jsonData.getString("exchange_num")+" HLC,单价："+jsonData.getString("coin_rate")+" RMB,兑换金额："+jsonData.getBigDecimal("rmb_amnt")+" RMB");
                 }else{
                     continue;
-                }*/
+                }
                 logger.info("-------------------bussType="+jsonData.getString("bussType"));
                 if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
                     jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
