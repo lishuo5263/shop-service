@@ -30,4 +30,9 @@ public class DataHashServiceImpl implements DataHashService {
         return (List<PageData>)dao.findForList("DataHashMapper.getDataList", rows);
     }
 
+    @Override
+    public boolean insertData(PageData pd) throws Exception {
+        return (Integer)dao.save("DataHashMapper.insertData", pd)>0;
+    }
+
 }

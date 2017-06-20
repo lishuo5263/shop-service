@@ -30,4 +30,13 @@ public interface DataHashService {
      * @return: List<PageData>
      */
     List<PageData> getDataList(Integer rows)throws Exception;
+    /**
+     * @describe:插入数据
+     * @author: zhangchunming
+     * @date: 2017年6月20日下午3:32:25
+     * @param pd
+     * @throws Exception
+     * @return: boolean
+     */
+    boolean insertData(PageData pd) throws Exception;
 }

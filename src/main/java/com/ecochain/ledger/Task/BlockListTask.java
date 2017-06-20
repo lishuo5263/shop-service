@@ -128,12 +128,16 @@ public class BlockListTask {
                 }
             }
             
-            if(dataList.size()>0){
+            /*if(dataList.size()>0){
                 PageData pd = new PageData();
                 pd.put("dataList", dataList);
                 dataHashService.insert(pd);
                 logger.info("------BlockListTask.getDataList--------同步dataList-------end-----dataList="+dataList.toString());
+            }*/
+            for(PageData pd:dataList){
+                dataHashService.insertData(pd);
             }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

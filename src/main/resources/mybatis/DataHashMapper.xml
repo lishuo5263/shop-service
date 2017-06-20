@@ -11,6 +11,10 @@
       (#{item.hash,jdbcType=VARCHAR}, #{item.data,jdbcType=INTEGER}, now())
     </foreach>
   </insert>
+  <insert id="insertData" parameterType="com.ecochain.ledger.model.PageData" >
+    insert into data_hash (hash, data, create_time)
+    values (#{hash,jdbcType=VARCHAR}, #{data,jdbcType=INTEGER}, now())
+  </insert>
   <select id="getHashList50" resultType="java.lang.String">
     select hash from data_hash order by id desc limit 0,50 
   </select>
