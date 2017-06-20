@@ -1,25 +1,5 @@
 package com.ecochain.ledger.web.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import tk.mybatis.mapper.util.StringUtil;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.base.BaseWebService;
@@ -29,11 +9,22 @@ import com.ecochain.ledger.model.PageData;
 import com.ecochain.ledger.service.BlockHashService;
 import com.ecochain.ledger.service.DataHashService;
 import com.ecochain.ledger.service.SysGenCodeService;
-import com.ecochain.ledger.util.AjaxResponse;
-import com.ecochain.ledger.util.Base64;
-import com.ecochain.ledger.util.DateUtil;
-import com.ecochain.ledger.util.HttpTool;
-import com.ecochain.ledger.util.Logger;
+import com.ecochain.ledger.util.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import tk.mybatis.mapper.util.StringUtil;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 /**
  * 账户控制类
  * @author zhangchunming
@@ -572,7 +563,8 @@ public class BlockDataWebService extends BaseWebService{
                     continue;
                 }
                 if("insertOrder".equals(jsonData.getString("bussType"))){
-                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
+                    //jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
+                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价：2 HLC,总金额："+jsonData.getString("payPrice")+" HLC，订单状态：待支付");
                     jsonData.put("create_time", jsonData.getString("addTime"));
                     jsonData.put("user_name", jsonData.getString("userName"));
                 }else if("payNow".equals(jsonData.getString("bussType"))){
@@ -704,6 +696,7 @@ public class BlockDataWebService extends BaseWebService{
 //                    jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
                     jsonData.put("create_time", jsonData.getString("addTime"));
                     jsonData.put("user_name", jsonData.getString("userName"));
+                    jsonData.put("payPrice", "2");
                     jsonData.remove("csessionid");
                     jsonData.remove("skuInfo");
                     jsonData.remove("userName");
