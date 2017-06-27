@@ -1,5 +1,27 @@
 package com.ecochain.ledger.web.rest;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import tk.mybatis.mapper.util.StringUtil;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.base.BaseWebService;
@@ -9,22 +31,11 @@ import com.ecochain.ledger.model.PageData;
 import com.ecochain.ledger.service.BlockHashService;
 import com.ecochain.ledger.service.DataHashService;
 import com.ecochain.ledger.service.SysGenCodeService;
-import com.ecochain.ledger.util.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import tk.mybatis.mapper.util.StringUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.ecochain.ledger.util.AjaxResponse;
+import com.ecochain.ledger.util.Base64;
+import com.ecochain.ledger.util.DateUtil;
+import com.ecochain.ledger.util.HttpTool;
+import com.ecochain.ledger.util.Logger;
 /**
  * 账户控制类
  * @author zhangchunming
@@ -563,8 +574,8 @@ public class BlockDataWebService extends BaseWebService{
                     continue;
                 }
                 if("insertOrder".equals(jsonData.getString("bussType"))){
-                    //jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
-                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价：2 HLC,总金额："+jsonData.getString("payPrice")+" HLC，订单状态：待支付");
+                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价：2 HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
+//                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价：2 HLC,总金额："+jsonData.getString("payPrice")+" HLC，订单状态：待支付");
                     jsonData.put("create_time", jsonData.getString("addTime"));
                     jsonData.put("user_name", jsonData.getString("userName"));
                 }else if("payNow".equals(jsonData.getString("bussType"))){
@@ -593,6 +604,26 @@ public class BlockDataWebService extends BaseWebService{
             }
             dataList10.removeAll(removelist);
             if(dataList10.size()>0){
+                Collections.sort(dataList10, new Comparator<PageData>(){  
+                    
+                    /*  
+                     * int compare(PageData o1, PageData o2) 返回一个基本类型的整型，  
+                     * 返回负数表示：o1 小于o2，  
+                     * 返回0 表示：o1和o2相等，  
+                     * 返回正数表示：o1大于o2。  
+                     */  
+                    public int compare(PageData o1, PageData o2) {  
+                      
+                        //按照时间降序
+                        if(Integer.valueOf(((JSONObject)o1.get("data")).getString("create_time")) < Integer.valueOf(((JSONObject)o2.get("data")).getString("create_time"))){  
+                            return 1;  
+                        }  
+                        if(Integer.valueOf(((JSONObject)o1.get("data")).getString("create_time")) == Integer.valueOf(((JSONObject)o2.get("data")).getString("create_time"))){  
+                            return 0;  
+                        }  
+                        return -1;  
+                    }  
+                });
                 data.put("list", dataList10);
             }else{
                 data.put("list", null);
@@ -619,15 +650,23 @@ public class BlockDataWebService extends BaseWebService{
     @PostMapping("/getBlockList10")
     @ApiOperation(nickname = "获取最新的区块列表", value = "获取最新的区块列表", notes = "获取最新的区块列表")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "rows", value = "查询条数", required = false, paramType = "query", dataType = "String")
+        @ApiImplicitParam(name = "rows", value = "查询条数", required = true, paramType = "query", dataType = "String")
     })
     public AjaxResponse getBlockList10(HttpServletRequest request){
         AjaxResponse ar = new AjaxResponse();
         Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd  = new PageData();
+        pd = this.getPageData();
         try {
 //            String object = (String)JedisUtil.get("blockList");
 //            List<JSONObject> blockList = (List<JSONObject>)JedisUtil.get("blockList");
-            List<PageData> blockList = blockHashService.getBlockList10();
+            if(pd.getRows() == null){
+                ar.setSuccess(false);
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入查询条数！");
+                return ar;
+            }
+            List<PageData> blockList = blockHashService.getBlockList10(pd.getRows());
             data.put("blockList", blockList);
             ar.setData(data);
             ar.setSuccess(true);

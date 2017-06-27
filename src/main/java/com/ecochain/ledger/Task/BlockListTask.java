@@ -102,7 +102,7 @@ public class BlockListTask {
             logger.info("------BlockListTask.getDataList--------kql_url="+kql_url);
             String rows = "40";
             String result = HttpTool.doPost(kql_url+"/GetDataList", rows);
-            
+            logger.info("----------------GetDataList="+result);
             List<String> hashList50 = dataHashService.getHashList50();
             
             JSONObject dataObj = JSONObject.parseObject(result);

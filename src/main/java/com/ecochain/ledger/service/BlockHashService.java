@@ -29,5 +29,5 @@ public interface BlockHashService {
      * @throws Exception
      * @return: List<PageData>
      */
-    List<PageData> getBlockList10()throws Exception;
+    List<PageData> getBlockList10(Integer rows)throws Exception;
 }

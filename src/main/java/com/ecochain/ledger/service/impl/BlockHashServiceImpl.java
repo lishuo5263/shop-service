@@ -30,8 +30,8 @@ public class BlockHashServiceImpl implements BlockHashService {
     }
 
     @Override
-    public List<PageData> getBlockList10() throws Exception {
-        return (List<PageData>)dao.findForList("BlockHashMapper.getBlockList10", null);
+    public List<PageData> getBlockList10(Integer rows) throws Exception {
+        return (List<PageData>)dao.findForList("BlockHashMapper.getBlockList10", rows);
     }
 
 }

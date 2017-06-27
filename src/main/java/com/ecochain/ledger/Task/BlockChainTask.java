@@ -60,6 +60,7 @@ public class BlockChainTask {
            }
        }
         String getToDayBlockInfo = HttpTool.doPost(kql_url+"/GetDataList", "100");
+        
         JSONObject toDayBlockInfo = JSONObject.parseObject(getToDayBlockInfo);
           for (int i = toDayBlockInfo.getJSONArray("result").size()-1;i>=0;i--) {
             JSONObject resultInfo = (JSONObject) toDayBlockInfo.getJSONArray("result").get(i);
