@@ -908,6 +908,14 @@ public class ShopOrderInfoWebService extends BaseWebService {
             if (orderGoods == null) {
                 return fastReturn("订单不存在",false,"订单不存在",CodeConstant.ORDER_NO_EXISTS);
             }
+            
+            if("6".equals(String.valueOf(orderGoods.get("state")))){
+                ar.setMessage("请勿重复提交！");
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setSuccess(false);
+                return ar;
+            }
+            
             if (shopOrderInfoService.updateStateByOrderNo(pd, Constant.VERSION_NO)) {
                 return fastReturn("确认收货成功！",true,"确认收货成功！",CodeConstant.SC_OK);
             } else {

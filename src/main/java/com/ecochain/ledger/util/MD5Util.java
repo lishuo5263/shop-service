@@ -59,7 +59,7 @@ public class MD5Util {
 
     public static void main(String[] args) {
     	MD5Util getMD5 = new MD5Util();
-        System.out.println(getMD5.getMd5Code("zxc123"));
+        System.out.println(getMD5.getMd5Code("123456"));
     }
 }
 

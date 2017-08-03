@@ -696,11 +696,15 @@ public class UsersWebService extends BaseWebService {
         System.out.println(Base64.getBase64("KzopQgjVwAG2cqEHLWLJ9DKU5LpiUjcbREKoX3LbVgzPVC4S3Hynl"));
         System.out.println(Base64.getFromBase64("S3pvcFFnalZ3QUcyY3FFSExXTEo5REtVNUxwaVVqY2JSRUtvWDNMYlZnelBWQzRTM0h5bmw="));*/
         
-        String base64 = Base64.getBase64("9fd50096398d4b428d57da0f4bffbb67");
+        /*String base64 = Base64.getBase64("9fd50096398d4b428d57da0f4bffbb67");
         System.out.println("base64="+base64);
         
         char[] a = {'1','2'};
-        System.out.println(a.toString());
+        System.out.println(a.toString());*/
+        
+        char x = 'a';
+        int y = 1;
+        System.out.println(x+y);
         
     }
     
@@ -736,5 +740,6 @@ public class UsersWebService extends BaseWebService {
             CLibrary.INSTANCE.printf("Argument %d: %s\n", i, args[i]);
         }
     }*/
+    
 
 }
