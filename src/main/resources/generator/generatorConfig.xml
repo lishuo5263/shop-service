@@ -42,17 +42,17 @@
             <property name="forceBigDecimals" value="false" />
         </javaTypeResolver>
         
-        <javaModelGenerator targetPackage="tk.mybatis.springboot.model" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="com.ecochain.ledger.model" targetProject="src/main/java">
             <property name="constructorBased" value="true" />
             <property name="enableSubPackages" value="true" />
             <property name="trimStrings" value="true" />
         </javaModelGenerator>
         
-        <sqlMapGenerator targetPackage="mapper" targetProject="src/main/resources">
+        <sqlMapGenerator targetPackage="com.ecochain.ledger.mapper" targetProject="src/main/resources">
             <property name="enableSubPackages" value="true" />
         </sqlMapGenerator>
 
-        <javaClientGenerator targetPackage="tk.mybatis.springboot.mapper" targetProject="src/main/java" type="XMLMAPPER">
+        <javaClientGenerator targetPackage="com.ecochain.ledger.model" targetProject="src/main/java" type="XMLMAPPER">
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
@@ -63,7 +63,7 @@
             <generatedKey column="id" sqlStatement="select SEQ_{1}.nextval from dual" identity="false" type="pre"/>
         </table> -->
         
-         <table schema="mybatis" tableName="user" domainObjectName="User">
+         <table schema="mybatis" tableName="fabric_block_info" domainObjectName="FabricBlockInfo">
             <property name="constructorBased" value="true" />
             <property name="useActualColumnNames" value="false" />
             <property name="ignoreQualifiersAtRuntime" value="true" />

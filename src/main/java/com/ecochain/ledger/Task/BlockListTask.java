@@ -1,3 +1,4 @@
+/*
 package com.ecochain.ledger.Task;
 
 import java.util.ArrayList;
@@ -21,9 +22,11 @@ import com.ecochain.ledger.service.ShopOrderInfoService;
 import com.ecochain.ledger.service.SysGenCodeService;
 import com.ecochain.ledger.util.HttpTool;
 
+*/
 /**
  * Created by Lisandro on 2017/5/17.
- */
+ *//*
+
 @Component
 @EnableScheduling
 public class BlockListTask {
@@ -128,12 +131,14 @@ public class BlockListTask {
                 }
             }
             
-            /*if(dataList.size()>0){
+            */
+/*if(dataList.size()>0){
                 PageData pd = new PageData();
                 pd.put("dataList", dataList);
                 dataHashService.insert(pd);
                 logger.info("------BlockListTask.getDataList--------同步dataList-------end-----dataList="+dataList.toString());
-            }*/
+            }*//*
+
             for(PageData pd:dataList){
                 dataHashService.insertData(pd);
             }
@@ -143,3 +148,4 @@ public class BlockListTask {
         }
     }
 }
+*/

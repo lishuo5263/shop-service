@@ -137,18 +137,4 @@ public class FabricBlockInfo implements Serializable {
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         return result;
     }
-
-    @Override
-    public String toString() {
-        return "FabricBlockInfo{" +
-                "id=" + id +
-                ", fabricHash='" + fabricHash + '\'' +
-                ", fabricUuid='" + fabricUuid + '\'' +
-                ", fabricBussType='" + fabricBussType + '\'' +
-                ", hashData='" + hashData + '\'' +
-                ", createTime=" + createTime +
-                ", modifyTime=" + modifyTime +
-                ", updateTime=" + updateTime +
-                '}';
-    }
 }

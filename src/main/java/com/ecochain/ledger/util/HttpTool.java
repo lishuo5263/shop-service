@@ -215,8 +215,6 @@ public class HttpTool {
                 "\""+jsonInfo+"\"\n" +
                 "    ]\n" +
                 "}");
-        System.out.println(stringBuffer.toString());
-        System.out.println("853cce273737c89b02a42c694d80a9ede2dacf1373ac1038152a3488c1457ecc".length());
         String getBlockInfo = doPost(" http://192.168.200.191:4000/createObj", stringBuffer.toString());
         System.out.println(getBlockInfo);
     }
