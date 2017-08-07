@@ -341,7 +341,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         map.put("list", list);
         map.put("list2", list2);
         map.put("userId", shopOrderGoods.get(0).getUserId());
-        logger.info("====================测试代码========start================");
+        /*logger.info("====================测试代码========start================");
         String jsonStr = HttpUtil.sendPostData(""+ kql_url+"/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
@@ -361,7 +361,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         if(StringUtil.isNotEmpty(json.getString("result"))){
             shopOrderGoods.get(0).setTradeHash(json.getString("result"));
         }
-        logger.info("====================测试代码=======end=================");
+        logger.info("====================测试代码=======end=================");*/
         this.shopOrderGoodsMapper.insert(shopOrderGoods);//新增商品信息
         shopOrderGoods.get(0).setGoodsAmount(totalMoney);
         shopOrderGoods.get(0).setOrderAmount(totalMoney);

@@ -130,7 +130,8 @@ public class HttpTool {
         httpURLConnection.setDoOutput(true);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
-        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        connection.setRequestProperty("Accept", "application/json"); // 设置接收数据的格式
+        //httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         httpURLConnection.setRequestProperty("Content-Type", "application/json");
         httpURLConnection.setRequestProperty("Content-Length", String.valueOf(parameterData.length()));
 
@@ -202,11 +203,21 @@ public class HttpTool {
             System.out.println("get_data_from_sys -------------->"+getBlockInfo);
         }*/
 
-        StringBuffer stringBuffer = new StringBuffer().append("\"").append("e3230f30c2b53f8d6b6a44dd2eb5a5eef255b1234dfcbcd5899396f77ac5def1").append("\"");
-        String getBlockInfo = doPost("http://192.168.10.47:8332/get_data_from_sys", stringBuffer.toString());
-        Map m = (Map) com.alibaba.fastjson.JSON.parse(getBlockInfo);
-        Map m3 = (Map) com.alibaba.fastjson.JSON.parse(com.alibaba.fastjson.JSON.parse(m.get("result").toString()).toString());
-        System.out.println(m);
-        System.out.println(m3);
+        //StringBuffer stringBuffer = new StringBuffer().append("\"").append("e3230f30c2b53f8d6b6a44dd2eb5a5eef255b1234dfcbcd5899396f77ac5def1").append("\"");
+        String uuid ="738475384578345";
+        String bussType="insertShopOrder";
+        String jsonInfo="eyAgCiJqc29ucnBjIjogIjIuMCIsICAKIm1ldGhvZCI6ICJxdWVyeSIsICAKInBhcmFtcyI6IHsgIAoidHlwZSI6IDEsICAKImNoYWluY29kZUlEIjp7ICAKIm5hbWUiOiIxNGI4N2IzYTFjNTZmOGNhNTZkY2VlMWEyNTBkZGRmMzYyZGQxZGZjOTc5YmY3MDAzNzg1ZjFiYTM0NDcyMGYyNmViOGE3OGJiMzU2ZGYzOTIxMjI5YjUxM2I0OTExMTNmMWJlODNhOGM1MTZkZTA0NjFhODI4NmJiNGMyM2VlMCIgIAp9LCAgCiJjdG9yTXNnIjogeyAgCiJmdW5jdGlvbiI6InF1ZXJ5T2JqcyIsICAKImFyZ3MiOlsiMTAwMSwxMDAyLDEwMDMiLCJvcmRlcixvcmRlcixwcm8iXSAgCn0sICAKInNlY3VyZUNvbnRleHQiOiAgImppbSIgIAp9LCAgCiJpZCI6IDUgIAp9ICA=";
+        StringBuffer stringBuffer = new StringBuffer("{\n" +
+                "    \"fcn\":\"createObj\",\n" +
+                "    \"args\":[\n" +
+                "        \""+uuid+"\",\n" +
+                "        \""+bussType+"\",\n" +
+                "\""+jsonInfo+"\"\n" +
+                "    ]\n" +
+                "}");
+        System.out.println(stringBuffer.toString());
+        System.out.println("853cce273737c89b02a42c694d80a9ede2dacf1373ac1038152a3488c1457ecc".length());
+        String getBlockInfo = doPost(" http://192.168.200.191:4000/createObj", stringBuffer.toString());
+        System.out.println(getBlockInfo);
     }
 }
