@@ -371,7 +371,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================调用fabric测试代码=======start=================");
         String uuid =shopOrderGoods.get(0).getOrderNo();
         String bussType="insertShopOrder";
-        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData());
+        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData().replace("\n","").replace("\r",""));
         StringBuffer stringBuffer = new StringBuffer("{\n" +
                 "    \"fcn\":\"createObj\",\n" +
                 "    \"args\":[\n" +
@@ -380,7 +380,6 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
                 "\""+jsonInfo+"\"\n" +
                 "    ]\n" +
                 "}");
-        System.out.println("json信息为"+shopOrderGoods.get(0).getData());
         System.out.println("json信息为------------------>"+jsonInfo);
         String fabrickInfo = doPost(kql_url+"/createObj", stringBuffer.toString());
         logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
@@ -388,7 +387,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
         fabricBlockInfo.setFabricUuid(shopOrderGoods.get(0).getOrderNo()); //java
-        fabricBlockInfo.setHashData(Base64.getBase64(shopOrderGoods.get(0).getData()));
+        fabricBlockInfo.setHashData(shopOrderGoods.get(0).getData());
         fabricBlockInfo.setFabricBussType(bussType);
         fabricBlockInfo.setCreateTime(new Date());
         fabricBlockInfoMapper.insert(fabricBlockInfo);
