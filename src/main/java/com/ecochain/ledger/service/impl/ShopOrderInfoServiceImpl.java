@@ -26,6 +26,8 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static com.ecochain.ledger.util.HttpTool.doPost;
+
 @Component("shopOrderInfoService")
 public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     private final Logger logger = LoggerFactory.getLogger(ShopOrderInfoServiceImpl.class);
@@ -68,6 +70,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
     private ShopOrderLogisticsDetailMapper shopOrderLogisticsDetailMapper;
     @Autowired
     private ShopOrderLogisticsDetailService shopOrderLogisticsDetailService;
+    @Autowired
+    private FabricBlockInfoMapper fabricBlockInfoMapper;
 
     @Override
     public boolean updateOrderRefundStatus(String orderNo) {
@@ -343,7 +347,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         map.put("list", list);
         map.put("list2", list2);
         map.put("userId", shopOrderGoods.get(0).getUserId());
-        logger.info("====================测试代码========start================");
+        /*logger.info("====================测试代码========start================");
         String jsonStr = HttpUtil.sendPostData(""+ kql_url+"/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
@@ -363,7 +367,31 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         if(StringUtil.isNotEmpty(json.getString("result"))){
             shopOrderGoods.get(0).setTradeHash(json.getString("result"));
         }
-        logger.info("====================测试代码=======end=================");
+        logger.info("====================测试代码=======end=================");*/
+        logger.info("====================调用fabric测试代码=======start=================");
+        String uuid =shopOrderGoods.get(0).getOrderNo();
+        String bussType="insertShopOrder";
+        String jsonInfo=shopOrderGoods.get(0).getData();
+        StringBuffer stringBuffer = new StringBuffer("{\n" +
+                "    \"fcn\":\"createObj\",\n" +
+                "    \"args\":[\n" +
+                "        \""+uuid+"\",\n" +
+                "        \""+bussType+"\",\n" +
+                "\""+jsonInfo+"\"\n" +
+                "    ]\n" +
+                "}");
+        String fabrickInfo = doPost(kql_url+"/createObj", stringBuffer.toString());
+        logger.info("====================调用fabric接口返回为========================" + fabrickInfo);
+        logger.info("====================调用fabric测试代码=======end=================");
+        FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
+        fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+        fabricBlockInfo.setFabricUuid(shopOrderGoods.get(0).getOrderNo()); //java
+        fabricBlockInfo.setHashData(Base64.getBase64(shopOrderGoods.get(0).getData()));
+        fabricBlockInfo.setFabricBussType(bussType);
+        fabricBlockInfo.setCreateTime(new Date());
+        fabricBlockInfoMapper.insert(fabricBlockInfo);
+        logger.info("====================调用fabric接口记录DB=======success=================");
+
         this.shopOrderGoodsMapper.insert(shopOrderGoods);//新增商品信息
         shopOrderGoods.get(0).setGoodsAmount(totalMoney);
         shopOrderGoods.get(0).setOrderAmount(totalMoney);
