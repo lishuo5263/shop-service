@@ -781,6 +781,9 @@
   <update id="updateOrderStatusByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
     update shop_order_info 
     <set >
+      <if test="pay_time != null" >
+        pay_time = #{pay_time}
+      </if>
       <if test="order_status != null" >
         order_status = #{order_status}
       </if>

@@ -264,4 +264,10 @@
   <select id="getStateByOrderNo" parameterType="java.lang.String" resultType="java.lang.String">
         select state from shop_order_goods where shop_order_no = #{shop_order_no}
   </select>
+  
+  <update id="updateStatusByOrderNo" parameterType="com.ecochain.ledger.model.PageData">
+    update shop_order_goods a set a.state = #{state} 
+    where 1=1
+    and a.shop_order_no = #{shop_order_no}
+  </update>
 </mapper>

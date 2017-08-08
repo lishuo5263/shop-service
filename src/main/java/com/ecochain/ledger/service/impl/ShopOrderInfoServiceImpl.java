@@ -12,6 +12,7 @@ import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpUtil;
 import com.ecochain.ledger.util.StringUtil;
 import com.github.pagehelper.PageHelper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -574,8 +576,11 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             /*accDetail.put("caldate", DateUtil.getCurrDateTime());
             accDetail.put("cntflag", "1");
             accDetail.put("status", "4");*/
-            accDetail.put("status", "5");//5-审核中，6-成功，7失败
+            accDetail.put("status", "6");//5-审核中，6-成功，7失败
             pd.put("status", "6");//进区块链
+            accDetail.put("cntflag", "1");
+            accDetail.put("caldate", DateUtil.getCurrDateTime());
+            pd.put("caldate", DateUtil.getCurrDateTime());
             accDetail.put("otherno", pd.getString("order_no"));
             accDetail.put("other_amnt", String.valueOf(pd.get("order_amount")));
             accDetail.put("other_source", "商城支付");
@@ -590,6 +595,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             pd.put("pay_time", DateUtil.getCurrDateTime());//进区块链
             pd.put("order_status","2");//进区块链,订单状态
             pd.put("state","2");//进区块链，订单商品关联表状态
+            pd.put("pay_time", DateUtil.getCurrDateTime());
             
             /*logger.info("====================生产掉动态库代码========start================");
             String seedsStr = pd.getString("seeds");
@@ -609,7 +615,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             }
             
 //            String jsonStr = HttpUtil.sendPostData("http://192.168.200.83:8332/get_new_key", "");
-            String jsonStr = HttpUtil.sendPostData(kql_url+"/get_new_key", "");
+            /*String jsonStr = HttpUtil.sendPostData(kql_url+"/get_new_key", "");
             JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
             PageData keyPd = new PageData();
             keyPd.put("data",Base64.getBase64((JSON.toJSONString(pd))));
@@ -628,7 +634,9 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             if(StringUtil.isNotEmpty(json.getString("result"))){
                 accDetail.put("hash", json.getString("result")); 
                 pd.put("trade_hash", json.getString("result")); 
-            }
+            }*/
+            //1、调fabric插入hash
+            //2、插入库里fabric_block_info
             logger.info("====================测试代码=======end=================");
             
             boolean accDetailResult = accDetailService.insertSelective(accDetail, Constant.VERSION_NO);
@@ -636,11 +644,17 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             
             PageData tshopOrder = new PageData();
             tshopOrder.put("order_no", pd.getString("order_no"));
-//            tshopOrder.put("trade_hash", pd.getString("trade_hash"));
-            tshopOrder.put("order_status", "10");//支付处理中
-            
+            tshopOrder.put("order_status", "2");//支付处理中
+            tshopOrder.put("pay_time", DateUtil.getCurrDateTime());
             boolean updateOrderHashResult = updateOrderStatusByOrderNo(tshopOrder);
             logger.info("--------商城兑换订单更新hash值---------updateOrderHashResult结果："+updateOrderHashResult);
+            if(updateOrderHashResult){
+                //修改订单商品关联表状态为已支付
+                PageData shopOrderGoods = new PageData();
+                shopOrderGoods.put("shop_order_no", pd.getString("order_no"));
+                shopOrderGoods.put("state", "2");
+                shopOrderGoodsService.updateStatusByOrderNo(shopOrderGoods);
+            }
             //解锁订单
             boolean unLockOrderByOrderNo = unLockOrderByOrderNo(pd);
             logger.info("支付订单解锁结果unLockOrderByOrderNo："+unLockOrderByOrderNo);

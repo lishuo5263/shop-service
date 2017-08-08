@@ -82,4 +82,9 @@ public class ShopOrderGoodsServiceImpl implements ShopOrderGoodsService {
         return (String)dao.findForObject("com.ecochain.ledger.mapper.ShopOrderGoodsMapper.getStateByOrderNo", shop_order_no);
     }
 
+    @Override
+    public boolean updateStatusByOrderNo(PageData pd) throws Exception {
+        return (Integer)dao.update("com.ecochain.ledger.mapper.ShopOrderGoodsMapper.updateStatusByOrderNo", pd)>0;
+    }
+
 }

@@ -24,7 +24,7 @@ import java.util.List;
  * Created by Lisandro on 2017/5/17.
  */
 @Component
-@EnableScheduling
+//@EnableScheduling
 public class BlockChainTask {
     
     private Logger logger = Logger.getLogger(BlockChainTask.class);
@@ -44,7 +44,7 @@ public class BlockChainTask {
 
     
 
-    @Scheduled(fixedDelay=12000)
+//    @Scheduled(fixedDelay=12000)
     public void scheduler()throws  Exception {
         /**
          * 1.需要调用区块链接口查出当日增量的hash数据
