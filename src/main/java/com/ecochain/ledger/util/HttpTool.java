@@ -223,13 +223,13 @@ public class HttpTool {
 
         String uuid =OrderGenerater.generateOrderNo();
         String bussType="insertShopOrder";
-        /*String jsonInfo ="{\n" +
+        String jsonInfo ="{\n" +
                 "    \"supplierName\":\"testsupplier\",\n" +
                 "    \"goodsNumber\":\"3\",\n" +
                 "    \"userCode\":\"999\",\n" +
                 "    \"userId\":\"25918\",\n" +
                 "    \"addressId\":\"774\",\n" +
-                "    \"postscript\":\"ls测试\",\n" +
+                "    \"postwscript\":\"ls测试\",\n" +
                 "    \"shippingName\":\"货到付款\",\n" +
                 "    \"howOos\":\"不要了\",\n" +
                 "    \"payName\":\"weicat pay\",\n" +
@@ -238,8 +238,8 @@ public class HttpTool {
                 "    \"payPrice\":\"100\",\n" +
                 "    \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\",\n" +
                 "    \"isPromote\":\"0\"\n" +
-                "}";*/
-        String jsonInfo="{ \"supplierName\":\"testsupplier\", \"goodsNumber\":\"3\", \"userCode\":\"999\", \"userId\":\"25918\", \"addressId\":\"774\", \"postscript\":\"ls测试\", \"shippingName\":\"货到付款\", \"howOos\":\"不要了\", \"payName\":\"weicat pay\", \"goodsId\":\"1120\", \"skuValue\":\"lstextlslsls\", \"payPrice\":\"100\", \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\", \"isPromote\":\"0\" ,\"orderNo\":\"170807183619041854999\",\"userName\":\"15011478695\",\"addTime\":\"2017-08-07 18:36:19\",\"goodsName\":\"null\",\"bussType\":\"insertOrder\"}";
+                "}";
+        //String jsonInfo="{ \"supplierName\":\"testsupplier\", \"goodsNumber\":\"3\", \"userCode\":\"999\", \"userId\":\"25918\", \"addressId\":\"774\", \"postscript\":\"ls测试\", \"shippingName\":\"货到付款\", \"howOos\":\"不要了\", \"payName\":\"weicat pay\", \"goodsId\":\"1120\", \"skuValue\":\"lstextlslsls\", \"payPrice\":\"100\", \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\", \"isPromote\":\"0\" ,\"orderNo\":\"170807183619041854999\",\"userName\":\"15011478695\",\"addTime\":\"2017-08-07 18:36:19\",\"goodsName\":\"null\",\"bussType\":\"insertOrder\"}";
         //String jsonInfo="eyAgCiJqc29ucnBjIjogIjIuMCIsICAKIm1ldGhvZCI6ICJxdWVyeSIsICAKInBhcmFtcyI6IHsgIAoidHlwZSI6IDEsICAKImNoYWluY29kZUlEIjp7ICAKIm5hbWUiOiIxNGI4N2IzYTFjNTZmOGNhNTZkY2VlMWEyNTBkZGRmMzYyZGQxZGZjOTc5YmY3MDAzNzg1ZjFiYTM0NDcyMGYyNmViOGE3OGJiMzU2ZGYzOTIxMjI5YjUxM2I0OTExMTNmMWJlODNhOGM1MTZkZTA0NjFhODI4NmJiNGMyM2VlMCIgIAp9LCAgCiJjdG9yTXNnIjogeyAgCiJmdW5jdGlvbiI6InF1ZXJ5T2JqcyIsICAKImFyZ3MiOlsiMTAwMSwxMDAyLDEwMDMiLCJvcmRlcixvcmRlcixwcm8iXSAgCn0sICAKInNlY3VyZUNvbnRleHQiOiAgImppbSIgIAp9LCAgCiJpZCI6IDUgIAp9ICA=";
         String a=JSONObject.parse(jsonInfo.trim()).toString();
         System.out.println(a);

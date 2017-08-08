@@ -371,16 +371,17 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================调用fabric测试代码=======start=================");
         String uuid =shopOrderGoods.get(0).getOrderNo();
         String bussType="insertShopOrder";
-        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData().replace("\n","").replace("\r",""));
+        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData().trim());
+        String finalInfo =jsonInfo.replace("\n","").replace("\r","");
         StringBuffer stringBuffer = new StringBuffer("{\n" +
                 "    \"fcn\":\"createObj\",\n" +
                 "    \"args\":[\n" +
                 "        \""+uuid+"\",\n" +
                 "        \""+bussType+"\",\n" +
-                "\""+jsonInfo+"\"\n" +
+                "\""+finalInfo+"\"\n" +
                 "    ]\n" +
                 "}");
-        System.out.println("json信息为------------------>"+jsonInfo);
+        System.out.println("调用fabric给的加密数据信息为------------------>"+finalInfo);
         String fabrickInfo = doPost(kql_url+"/createObj", stringBuffer.toString());
         logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
         logger.info("====================调用fabric测试代码=======end=================");
