@@ -27,7 +27,7 @@ import java.util.List;
  *//*
 
 @Component
-@EnableScheduling
+//@EnableScheduling
 public class BlockChainTask {
     
     private Logger logger = Logger.getLogger(BlockChainTask.class);
@@ -47,7 +47,7 @@ public class BlockChainTask {
 
     
 
-    @Scheduled(fixedDelay=12000)
+//    @Scheduled(fixedDelay=12000)
     public void scheduler()throws  Exception {
         */
 /**

@@ -112,4 +112,14 @@ public interface ShopOrderGoodsService {
      * @return: String
      */
     String getStateByOrderNo(String shop_order_no) throws Exception;
+    
+    /**
+     * @describe:根据订单号修改订单商品关联表状态
+     * @author: zhangchunming
+     * @date: 2017年8月7日下午6:07:19
+     * @param pd
+     * @throws Exception
+     * @return: boolean
+     */
+    boolean updateStatusByOrderNo(PageData pd) throws Exception;
  }

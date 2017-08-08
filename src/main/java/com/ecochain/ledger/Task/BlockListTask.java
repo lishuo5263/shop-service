@@ -28,7 +28,7 @@ import com.ecochain.ledger.util.HttpTool;
  *//*
 
 @Component
-@EnableScheduling
+//@EnableScheduling
 public class BlockListTask {
     
     private Logger logger = Logger.getLogger(BlockListTask.class);
@@ -52,7 +52,7 @@ public class BlockListTask {
 
     
 
-    @Scheduled(fixedDelay=5000)
+//    @Scheduled(fixedDelay=5000)
     public void getBlockList()throws  Exception {
         try {
             logger.info("------BlockListTask.getBlockList--------同步blockList-------start-----------");
