@@ -386,6 +386,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
         logger.info("====================调用fabric测试代码=======end=================");
         FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
+        shopOrderGoods.get(0).setTradeHash(Base64.getBase64(fabrickInfo));
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
         fabricBlockInfo.setFabricUuid(shopOrderGoods.get(0).getOrderNo()); //java
         fabricBlockInfo.setHashData(shopOrderGoods.get(0).getData());
