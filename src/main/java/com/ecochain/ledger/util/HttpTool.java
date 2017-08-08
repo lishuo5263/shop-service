@@ -1,5 +1,6 @@
 package com.ecochain.ledger.util;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -204,7 +205,8 @@ public class HttpTool {
         }*/
 
         //StringBuffer stringBuffer = new StringBuffer().append("\"").append("e3230f30c2b53f8d6b6a44dd2eb5a5eef255b1234dfcbcd5899396f77ac5def1").append("\"");
-        String uuid ="738475384578345";
+
+        /*String uuid =OrderGenerater.generateOrderNo();
         String bussType="insertShopOrder";
         String jsonInfo="eyAgCiJqc29ucnBjIjogIjIuMCIsICAKIm1ldGhvZCI6ICJxdWVyeSIsICAKInBhcmFtcyI6IHsgIAoidHlwZSI6IDEsICAKImNoYWluY29kZUlEIjp7ICAKIm5hbWUiOiIxNGI4N2IzYTFjNTZmOGNhNTZkY2VlMWEyNTBkZGRmMzYyZGQxZGZjOTc5YmY3MDAzNzg1ZjFiYTM0NDcyMGYyNmViOGE3OGJiMzU2ZGYzOTIxMjI5YjUxM2I0OTExMTNmMWJlODNhOGM1MTZkZTA0NjFhODI4NmJiNGMyM2VlMCIgIAp9LCAgCiJjdG9yTXNnIjogeyAgCiJmdW5jdGlvbiI6InF1ZXJ5T2JqcyIsICAKImFyZ3MiOlsiMTAwMSwxMDAyLDEwMDMiLCJvcmRlcixvcmRlcixwcm8iXSAgCn0sICAKInNlY3VyZUNvbnRleHQiOiAgImppbSIgIAp9LCAgCiJpZCI6IDUgIAp9ICA=";
         StringBuffer stringBuffer = new StringBuffer("{\n" +
@@ -216,6 +218,43 @@ public class HttpTool {
                 "    ]\n" +
                 "}");
         String getBlockInfo = doPost(" http://192.168.200.191:4000/createObj", stringBuffer.toString());
-        System.out.println(getBlockInfo);
+        System.out.println(getBlockInfo);*/
+
+
+        String uuid =OrderGenerater.generateOrderNo();
+        String bussType="insertShopOrder";
+        /*String jsonInfo ="{\n" +
+                "    \"supplierName\":\"testsupplier\",\n" +
+                "    \"goodsNumber\":\"3\",\n" +
+                "    \"userCode\":\"999\",\n" +
+                "    \"userId\":\"25918\",\n" +
+                "    \"addressId\":\"774\",\n" +
+                "    \"postscript\":\"ls测试\",\n" +
+                "    \"shippingName\":\"货到付款\",\n" +
+                "    \"howOos\":\"不要了\",\n" +
+                "    \"payName\":\"weicat pay\",\n" +
+                "    \"goodsId\":\"1120\",\n" +
+                "    \"skuValue\":\"lstextlslsls\",\n" +
+                "    \"payPrice\":\"100\",\n" +
+                "    \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\",\n" +
+                "    \"isPromote\":\"0\"\n" +
+                "}";*/
+        String jsonInfo="{ \"supplierName\":\"testsupplier\", \"goodsNumber\":\"3\", \"userCode\":\"999\", \"userId\":\"25918\", \"addressId\":\"774\", \"postscript\":\"ls测试\", \"shippingName\":\"货到付款\", \"howOos\":\"不要了\", \"payName\":\"weicat pay\", \"goodsId\":\"1120\", \"skuValue\":\"lstextlslsls\", \"payPrice\":\"100\", \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\", \"isPromote\":\"0\" ,\"orderNo\":\"170807183619041854999\",\"userName\":\"15011478695\",\"addTime\":\"2017-08-07 18:36:19\",\"goodsName\":\"null\",\"bussType\":\"insertOrder\"}";
+        //String jsonInfo="eyAgCiJqc29ucnBjIjogIjIuMCIsICAKIm1ldGhvZCI6ICJxdWVyeSIsICAKInBhcmFtcyI6IHsgIAoidHlwZSI6IDEsICAKImNoYWluY29kZUlEIjp7ICAKIm5hbWUiOiIxNGI4N2IzYTFjNTZmOGNhNTZkY2VlMWEyNTBkZGRmMzYyZGQxZGZjOTc5YmY3MDAzNzg1ZjFiYTM0NDcyMGYyNmViOGE3OGJiMzU2ZGYzOTIxMjI5YjUxM2I0OTExMTNmMWJlODNhOGM1MTZkZTA0NjFhODI4NmJiNGMyM2VlMCIgIAp9LCAgCiJjdG9yTXNnIjogeyAgCiJmdW5jdGlvbiI6InF1ZXJ5T2JqcyIsICAKImFyZ3MiOlsiMTAwMSwxMDAyLDEwMDMiLCJvcmRlcixvcmRlcixwcm8iXSAgCn0sICAKInNlY3VyZUNvbnRleHQiOiAgImppbSIgIAp9LCAgCiJpZCI6IDUgIAp9ICA=";
+        String a=JSONObject.parse(jsonInfo.trim()).toString();
+        System.out.println(a);
+        String b =Base64.getBase64(a.trim());
+        String c =b.replace("\n","").replace("\r","");
+        System.out.println(c);
+        StringBuffer stringBuffer = new StringBuffer("{\n" +
+                "    \"fcn\":\"createObj\",\n" +
+                "    \"args\":[\n" +
+                "        \""+uuid+"\",\n" +
+                "        \""+bussType+"\",\n" +
+                "\""+c+"\"\n" +
+                "    ]\n" +
+                "}");
+        String fabrickInfo = doPost(" http://192.168.200.191:4000/createObj", stringBuffer.toString());
+        System.out.println("====================调用fabric接口返回为========================" + fabrickInfo);
     }
 }

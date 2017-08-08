@@ -369,7 +369,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================调用fabric测试代码=======start=================");
         String uuid =shopOrderGoods.get(0).getOrderNo();
         String bussType="insertShopOrder";
-        String jsonInfo=shopOrderGoods.get(0).getData();
+        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData());
         StringBuffer stringBuffer = new StringBuffer("{\n" +
                 "    \"fcn\":\"createObj\",\n" +
                 "    \"args\":[\n" +
@@ -378,8 +378,10 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
                 "\""+jsonInfo+"\"\n" +
                 "    ]\n" +
                 "}");
+        System.out.println("json信息为"+shopOrderGoods.get(0).getData());
+        System.out.println("json信息为------------------>"+jsonInfo);
         String fabrickInfo = doPost(kql_url+"/createObj", stringBuffer.toString());
-        logger.info("====================调用fabric接口返回为========================" + fabrickInfo);
+        logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
         logger.info("====================调用fabric测试代码=======end=================");
         FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
