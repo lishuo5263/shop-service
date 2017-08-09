@@ -209,7 +209,7 @@ public class BlockDataWebService extends BaseWebService{
      * @param request
      * @return: AjaxResponse
      */
-    @PostMapping("/getDataByHash")
+    /*@PostMapping("/getDataByHash")
     @ApiOperation(nickname = "根据hash值查询交易数据", value = "根据hash值查询交易数据", notes = "根据hash值查询交易数据")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "hash", value = "hash值，需带双引号", required = true, paramType = "query", dataType = "String")
@@ -246,6 +246,69 @@ public class BlockDataWebService extends BaseWebService{
             JSONObject blockData = JSONObject.parseObject(result);
             String dataStr = Base64.getFromBase64(blockData.getJSONObject("result").getString("data"));
             blockData.getJSONObject("result").put("data", JSONObject.parseObject(dataStr));
+            data.put("result", blockData);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
+    }*/
+    
+    
+    @PostMapping("/getDataByHash")
+    @ApiOperation(nickname = "根据hash值查询交易数据", value = "根据hash值查询交易数据", notes = "根据hash值查询交易数据")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "hash", value = "hash值，需带双引号", required = true, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getDataByHash(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = new PageData();
+        pd = this.getPageData();
+        try {
+            if(StringUtil.isEmpty(pd.getString("hash"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入hash值！");
+                ar.setSuccess(false);
+                return ar;
+            }
+            
+            String hash = pd.getString("hash");
+            int length = pd.getString("hash").length();
+            if(!(hash.substring(0, 1)+hash.substring(length-1, length)).equals("\"\"")){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("参数格式错误，需带双引号！");
+                ar.setSuccess(false);
+                return ar;
+            }
+           /* String kql_url =null;
+            List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
+            for(PageData mapObj:codeList){
+                if("QKL_URL".equals(mapObj.get("code_name"))){
+                    kql_url = mapObj.get("code_value").toString();
+                }
+            }
+            String result = HttpTool.doPost(kql_url+"/get_data_from_sys", pd.getString("hash"));
+            JSONObject blockData = JSONObject.parseObject(result);
+            String dataStr = Base64.getFromBase64(blockData.getJSONObject("result").getString("data"));
+            blockData.getJSONObject("result").put("data", JSONObject.parseObject(dataStr));*/
+            
+            String fabric_hash = pd.getString("hash").replaceAll("\"", "");
+            FabricBlockInfo blockInfo = fabricBlockInfoMapper.getBlockByFabricHash(fabric_hash);
+            if(blockInfo == null){
+                ar.setData(null);
+                ar.setSuccess(true);
+                return ar;
+            }
+            JSONObject blockData = new JSONObject();
+            JSONObject result = new JSONObject();
+            result.put("data", blockInfo.getHashData());
+            blockData.put("result", result);
             data.put("result", blockData);
             ar.setData(data);
             ar.setSuccess(true);
@@ -665,8 +728,8 @@ public class BlockDataWebService extends BaseWebService{
 //            List<PageData> dataList10 = dataHashService.getDataList(pd.getRows());
             List<FabricBlockInfo> removelist = new ArrayList<FabricBlockInfo>();
             List<PageData> dataList = new ArrayList<PageData>();
-            PageData blockInfo = new PageData();
             for(int i = 0;i<dataList10.size();i++){
+                PageData blockInfo = new PageData();
                 String dataStr = dataList10.get(i).getHashData();
                 JSONObject jsonData = null;
                 try {
@@ -959,7 +1022,8 @@ public class BlockDataWebService extends BaseWebService{
             }
             JSONObject blockDetail = new JSONObject();
             JSONArray dataArray = new JSONArray();
-            FabricBlockInfo blockInfo = fabricBlockInfoMapper.getBlockByHash(pd.getString("hash"));
+            String block_hash = pd.getString("hash").replaceAll("\"", "");
+            FabricBlockInfo blockInfo = fabricBlockInfoMapper.getBlockByHash(block_hash);
             if(blockInfo == null){
                 ar.setData(null);
                 ar.setSuccess(true);
@@ -1005,7 +1069,8 @@ public class BlockDataWebService extends BaseWebService{
           }
               dataArray.add(jsonData);
               JSONObject result = new JSONObject();
-              blockDetail.put("result", result.put("qtx", dataArray));
+              result.put("qtx", dataArray);
+              blockDetail.put("result", result);
               blockDetail.put("hash", pd.getString("hash"));
             data.put("blockDetail", blockDetail);
             ar.setData(data);
@@ -1020,10 +1085,6 @@ public class BlockDataWebService extends BaseWebService{
         return ar;
     }
     public static void main(String[] args) {
-        String str = "11";
-        String base64Str = Base64.getBase64(str);
-        str = Base64.getFromBase64("MTK=");
-        System.out.println(base64Str);
-        System.out.println(str);
+        System.out.println("b0d60431b719cb91de8ad563085aaaa82c157c48aaef180cf7a5a4908a6b8d86".length());
     }
 }

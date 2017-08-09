@@ -19,4 +19,6 @@ public interface FabricBlockInfoMapper {
     FabricBlockInfo getBlockByHeight(String block_height);
     
     FabricBlockInfo getBlockByHash(String block_hash);
+    
+    FabricBlockInfo getBlockByFabricHash(String fabric_hash);
 }

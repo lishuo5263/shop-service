@@ -153,6 +153,9 @@
     select * from fabric_block_info where fabric_block_height = #{block_height}
   </select>
   <select id="getBlockByHash" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select * from fabric_block_info where fabric_block_hash = #{block_hash}
+    select <include refid="Base_Column_List" /> from fabric_block_info where fabric_block_hash = #{block_hash}
+  </select>
+  <select id="getBlockByFabricHash" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" /> from fabric_block_info where fabric_hash = #{fabric_hash}
   </select>
 </mapper>

@@ -399,8 +399,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
         fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
         fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
-        shopOrderGoods.get(0).setTradeHash(Base64.getBase64(fabrickInfo));
-        fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+        shopOrderGoods.get(0).setTradeHash(fabrickInfo);
+        fabricBlockInfo.setFabricHash(fabrickInfo); //fabric uuid
         fabricBlockInfo.setFabricUuid(shopOrderGoods.get(0).getOrderNo()); //java
         fabricBlockInfo.setHashData(shopOrderGoods.get(0).getData());
         fabricBlockInfo.setFabricBussType(bussType);
@@ -678,7 +678,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
             fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
             fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
-            fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+            fabricBlockInfo.setFabricHash(fabrickInfo); //fabric uuid
             fabricBlockInfo.setFabricUuid(uuid); //java
             fabricBlockInfo.setHashData(data);
             fabricBlockInfo.setFabricBussType(bussType);
@@ -687,8 +687,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             logger.info("====================调用fabric接口记录DB=======success=================");
             //1、调fabric插入hash
             //2、插入库里fabric_block_info
-            accDetail.put("hash", Base64.getBase64(fabrickInfo));
-            pd.put("trade_hash", Base64.getBase64(fabrickInfo));
+            accDetail.put("hash", fabrickInfo);
+            pd.put("trade_hash", fabrickInfo);
             boolean accDetailResult = accDetailService.insertSelective(accDetail, Constant.VERSION_NO);
             logger.info("--------商城兑换插入账户流水---------accDetailResult结果："+accDetailResult);
             
