@@ -1,6 +1,5 @@
 package com.ecochain.ledger.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.constants.Constant;
 import com.ecochain.ledger.dao.DaoSupport;
@@ -9,10 +8,8 @@ import com.ecochain.ledger.model.*;
 import com.ecochain.ledger.service.*;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
-import com.ecochain.ledger.util.HttpUtil;
-import com.ecochain.ledger.util.StringUtil;
+import com.ecochain.ledger.util.UuidUtil;
 import com.github.pagehelper.PageHelper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +19,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -740,7 +736,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             }
         }
         JSONObject json = null;
-        logger.info("====================测试代码========start================");
+       /* logger.info("====================测试代码========start================");
         String jsonStr = HttpUtil.sendPostData("" + kql_url + "/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
@@ -769,7 +765,43 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
             logger.info("====================确认收货新加物流信息=======end=================");
         }
-        logger.info("====================测试代码=======end=================");
+        logger.info("====================测试代码=======end=================");*/
+        logger.info("====================调用fabric测试代码=======start=================");
+        String uuid = UuidUtil.get32UUID();
+        String bussType="innerTransferLogisticss";
+        String jsonInfo= Base64.getBase64(JSONObject.toJSONString(pd.toString()));
+        String finalInfo =jsonInfo.replace("\n","").replace("\r","");
+        StringBuffer stringBuffer = new StringBuffer("{\n" +
+                "    \"fcn\":\"createObj\",\n" +
+                "    \"args\":[\n" +
+                "        \""+uuid+"\",\n" +
+                "        \""+bussType+"\",\n" +
+                "\""+finalInfo+"\"\n" +
+                "    ]\n" +
+                "}");
+        System.out.println(JSONObject.toJSONString(pd.toString()));
+        System.out.println("调用fabric给的加密数据信息为------------------>"+finalInfo);
+        String fabrickInfo = doPost(kql_url+"/createObj", stringBuffer.toString());
+        logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
+        logger.info("====================调用fabric测试代码=======end=================");
+        FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
+        fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+        fabricBlockInfo.setFabricUuid(uuid); //java
+        fabricBlockInfo.setHashData(jsonInfo);
+        fabricBlockInfo.setFabricBussType(bussType);
+        fabricBlockInfo.setCreateTime(new Date());
+        fabricBlockInfoMapper.insert(fabricBlockInfo);
+        logger.info("====================调用fabric接口记录DB=======success=================");
+
+        logger.info("====================确认收货新加物流信息=======start=================");
+        Map infoMap=shopOrderLogisticsDetailMapper.findLogisticsInfoByOrderNo(pd.getString("shop_order_no"));
+        pd.put("flag","notUpdate");
+        pd.put("logistics_no", infoMap.get("logistics_no"));
+        pd.put("logistics_msg", "买家:"+pd.getString("user_name")+"已确认收货");
+        pd.put("logistics_detail_hash", Base64.getBase64(fabrickInfo));
+        if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
+            logger.info("====================确认收货新加物流信息=======end=================");
+        }
         return (Integer) dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStateByOrderNo", pd) > 0;
     }
 
