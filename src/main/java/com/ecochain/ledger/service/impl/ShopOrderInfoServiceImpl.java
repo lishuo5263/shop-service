@@ -373,13 +373,14 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================调用fabric测试代码=======start=================");
         String uuid =shopOrderGoods.get(0).getOrderNo();
         String bussType="insertShopOrder";
-        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData()).replace("\n","").replace("\r","");
+        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData().trim());
+        String finalInfo =jsonInfo.replace("\n","").replace("\r","");
         StringBuffer stringBuffer = new StringBuffer("{\n" +
                 "    \"fcn\":\"createObj\",\n" +
                 "    \"args\":[\n" +
                 "        \""+uuid+"\",\n" +
                 "        \""+bussType+"\",\n" +
-                "\""+jsonInfo+"\"\n" +
+                "\""+finalInfo+"\"\n" +
                 "    ]\n" +
                 "}");
         System.out.println("json信息为------------------>"+jsonInfo);
@@ -398,6 +399,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
         fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
         fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
+        shopOrderGoods.get(0).setTradeHash(Base64.getBase64(fabrickInfo));
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
         fabricBlockInfo.setFabricUuid(shopOrderGoods.get(0).getOrderNo()); //java
         fabricBlockInfo.setHashData(shopOrderGoods.get(0).getData());
@@ -757,7 +759,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             }
         }
         JSONObject json = null;
-        logger.info("====================测试代码========start================");
+       /* logger.info("====================测试代码========start================");
         String jsonStr = HttpUtil.sendPostData("" + kql_url + "/get_new_key", "");
         JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
         PageData keyPd = new PageData();
@@ -786,7 +788,43 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
             logger.info("====================确认收货新加物流信息=======end=================");
         }
-        logger.info("====================测试代码=======end=================");
+        logger.info("====================测试代码=======end=================");*/
+        logger.info("====================调用fabric测试代码=======start=================");
+        String uuid = UuidUtil.get32UUID();
+        String bussType="innerTransferLogisticss";
+        String jsonInfo= Base64.getBase64(JSONObject.toJSONString(pd.toString()));
+        String finalInfo =jsonInfo.replace("\n","").replace("\r","");
+        StringBuffer stringBuffer = new StringBuffer("{\n" +
+                "    \"fcn\":\"createObj\",\n" +
+                "    \"args\":[\n" +
+                "        \""+uuid+"\",\n" +
+                "        \""+bussType+"\",\n" +
+                "\""+finalInfo+"\"\n" +
+                "    ]\n" +
+                "}");
+        System.out.println(JSONObject.toJSONString(pd.toString()));
+        System.out.println("调用fabric给的加密数据信息为------------------>"+finalInfo);
+        String fabrickInfo = HttpTool.doPost(kql_url+"/createObj", stringBuffer.toString());
+        logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
+        logger.info("====================调用fabric测试代码=======end=================");
+        FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
+        fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+        fabricBlockInfo.setFabricUuid(uuid); //java
+        fabricBlockInfo.setHashData(jsonInfo);
+        fabricBlockInfo.setFabricBussType(bussType);
+        fabricBlockInfo.setCreateTime(new Date());
+        fabricBlockInfoMapper.insert(fabricBlockInfo);
+        logger.info("====================调用fabric接口记录DB=======success=================");
+
+        logger.info("====================确认收货新加物流信息=======start=================");
+        Map infoMap=shopOrderLogisticsDetailMapper.findLogisticsInfoByOrderNo(pd.getString("shop_order_no"));
+        pd.put("flag","notUpdate");
+        pd.put("logistics_no", infoMap.get("logistics_no"));
+        pd.put("logistics_msg", "买家:"+pd.getString("user_name")+"已确认收货");
+        pd.put("logistics_detail_hash", Base64.getBase64(fabrickInfo));
+        if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
+            logger.info("====================确认收货新加物流信息=======end=================");
+        }
         return (Integer) dao.update("com.ecochain.ledger.mapper.ShopOrderInfoMapper.updateStateByOrderNo", pd) > 0;
     }
 
