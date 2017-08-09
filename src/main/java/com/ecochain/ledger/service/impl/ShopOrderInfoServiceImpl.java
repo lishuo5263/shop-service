@@ -10,7 +10,9 @@ import com.ecochain.ledger.service.*;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
 import com.ecochain.ledger.util.HttpUtil;
+import com.ecochain.ledger.util.OrderGenerater;
 import com.ecochain.ledger.util.StringUtil;
+import com.ecochain.ledger.util.UuidUtil;
 import com.github.pagehelper.PageHelper;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static com.ecochain.ledger.util.HttpTool.doPost;
+import com.ecochain.ledger.util.HttpTool;
 
 @Component("shopOrderInfoService")
 public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
@@ -371,7 +373,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================调用fabric测试代码=======start=================");
         String uuid =shopOrderGoods.get(0).getOrderNo();
         String bussType="insertShopOrder";
-        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData().replace("\n","").replace("\r",""));
+        String jsonInfo=Base64.getBase64(shopOrderGoods.get(0).getData()).replace("\n","").replace("\r","");
         StringBuffer stringBuffer = new StringBuffer("{\n" +
                 "    \"fcn\":\"createObj\",\n" +
                 "    \"args\":[\n" +
@@ -381,10 +383,21 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
                 "    ]\n" +
                 "}");
         System.out.println("json信息为------------------>"+jsonInfo);
-        String fabrickInfo = doPost(kql_url+"/createObj", stringBuffer.toString());
+        String fabrickInfo = HttpTool.doPost(kql_url+"/createObj", stringBuffer.toString());
+        String block_height_str = HttpTool.doGet(kql_url+"/channel/height");
+        String low = JSONObject.parseObject(block_height_str).getString("low");
+        int block_height = (Integer.valueOf(low)-1);
+        String block_info = HttpTool.doGet(kql_url+"/channel/blocks/"+block_height);
+        while(!block_info.contains(fabrickInfo)){
+            --block_height;
+            block_info = HttpTool.doGet(kql_url+"/channel/blocks/"+block_height);
+        }
         logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
         logger.info("====================调用fabric测试代码=======end=================");
-        FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
+        JSONObject block_info_obj = JSONObject.parseObject(block_info);
+        FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
+        fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
+        fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
         fabricBlockInfo.setFabricUuid(shopOrderGoods.get(0).getOrderNo()); //java
         fabricBlockInfo.setHashData(shopOrderGoods.get(0).getData());
@@ -626,15 +639,8 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
             pd.put("state","2");//进区块链，订单商品关联表状态
             pd.put("pay_time", DateUtil.getCurrDateTime());
             
-            /*logger.info("====================生产掉动态库代码========start================");
-            String seedsStr = pd.getString("seeds");
-            logger.info("seeds="+seedsStr);
-            String hash = qklLibService.sendDataToSys(seedsStr, accDetail);
-            accDetail.put("hash", hash); 
-            pd.put("trade_hash", hash); 
-            logger.info("====================生产掉动态库代码=======end=================");*/
             
-            logger.info("====================测试代码========start================");
+            logger.info("====================调用fabric测试代码=======start=================");
             String kql_url =null;
             List<PageData> codeList =sysGenCodeService.findByGroupCode("QKL_URL", Constant.VERSION_NO);
             for(PageData mapObj:codeList){
@@ -642,37 +648,50 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
                     kql_url = mapObj.get("code_value").toString();
                 }
             }
-            
-//            String jsonStr = HttpUtil.sendPostData("http://192.168.200.83:8332/get_new_key", "");
-            /*String jsonStr = HttpUtil.sendPostData(kql_url+"/get_new_key", "");
-            JSONObject keyJsonObj = JSONObject.parseObject(jsonStr);
-            PageData keyPd = new PageData();
-            keyPd.put("data",Base64.getBase64((JSON.toJSONString(pd))));
-            keyPd.put("publicKey",keyJsonObj.getJSONObject("result").getString("publicKey"));
-            keyPd.put("privateKey",keyJsonObj.getJSONObject("result").getString("privateKey"));
-            System.out.println("keyPd value is ------------->"+JSON.toJSONString(keyPd));
-            //2. 获取公钥签名
-            String signJsonObjStr =HttpUtil.sendPostData(kql_url+"/send_data_for_sign",JSON.toJSONString(keyPd));
-            JSONObject signJsonObj = JSONObject.parseObject(signJsonObjStr);
-            Map<String, Object> paramentMap =new HashMap<String, Object>();
-            paramentMap.put("publickey",keyJsonObj.getJSONObject("result").getString("publicKey"));
-            paramentMap.put("data",Base64.getBase64((JSON.toJSONString(pd))));
-            paramentMap.put("sign",signJsonObj.getString("result"));
-            String result = HttpUtil.sendPostData(kql_url+"/send_data_to_sys", JSON.toJSONString(paramentMap));
-            JSONObject json = JSON.parseObject(result);
-            if(StringUtil.isNotEmpty(json.getString("result"))){
-                accDetail.put("hash", json.getString("result")); 
-                pd.put("trade_hash", json.getString("result")); 
-            }*/
+            String uuid = UuidUtil.get32UUID();;
+            String bussType="payNow";
+            String data = JSON.toJSONString(pd);
+            String dataBase64 = Base64.getBase64(data).replace("\n","").replace("\r","");
+            StringBuffer stringBuffer = new StringBuffer("{\n" +
+                    "    \"fcn\":\"createObj\",\n" +
+                    "    \"args\":[\n" +
+                    "        \""+uuid+"\",\n" +
+                    "        \""+bussType+"\",\n" +
+                    "\""+dataBase64+"\"\n" +
+                    "    ]\n" +
+                    "}");
+            System.out.println("json信息为------------------>"+data);
+            String fabrickInfo = HttpTool.doPost(kql_url+"/createObj", stringBuffer.toString());
+            String block_height_str = HttpTool.doGet(kql_url+"/channel/height");
+            String low = JSONObject.parseObject(block_height_str).getString("low");
+            int block_height = (Integer.valueOf(low)-1);
+            String block_info = HttpTool.doGet(kql_url+"/channel/blocks/"+block_height);
+            while(!block_info.contains(fabrickInfo)){
+                --block_height;
+                block_info = HttpTool.doGet(kql_url+"/channel/blocks/"+block_height);
+            }
+            logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
+            logger.info("====================调用fabric测试代码=======end=================");
+            JSONObject block_info_obj = JSONObject.parseObject(block_info);
+            FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
+            fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
+            fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
+            fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+            fabricBlockInfo.setFabricUuid(uuid); //java
+            fabricBlockInfo.setHashData(data);
+            fabricBlockInfo.setFabricBussType(bussType);
+            fabricBlockInfo.setCreateTime(new Date());
+            fabricBlockInfoMapper.insert(fabricBlockInfo);
+            logger.info("====================调用fabric接口记录DB=======success=================");
             //1、调fabric插入hash
             //2、插入库里fabric_block_info
-            logger.info("====================测试代码=======end=================");
-            
+            accDetail.put("hash", Base64.getBase64(fabrickInfo));
+            pd.put("trade_hash", Base64.getBase64(fabrickInfo));
             boolean accDetailResult = accDetailService.insertSelective(accDetail, Constant.VERSION_NO);
             logger.info("--------商城兑换插入账户流水---------accDetailResult结果："+accDetailResult);
             
             PageData tshopOrder = new PageData();
-            tshopOrder.put("order_no", pd.getString("order_no"));
+            tshopOrder.put("shop_order_no", pd.getString("order_no"));
             tshopOrder.put("order_status", "2");//支付处理中
             tshopOrder.put("pay_time", DateUtil.getCurrDateTime());
             boolean updateOrderHashResult = updateOrderStatusByOrderNo(tshopOrder);

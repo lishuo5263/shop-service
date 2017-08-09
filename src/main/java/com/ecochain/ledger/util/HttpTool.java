@@ -1,6 +1,9 @@
 package com.ecochain.ledger.util;
 
+import static com.ecochain.ledger.util.HttpTool.doPost;
+
 import com.alibaba.fastjson.JSONObject;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -239,7 +242,7 @@ public class HttpTool {
                 "    \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\",\n" +
                 "    \"isPromote\":\"0\"\n" +
                 "}";*/
-        String jsonInfo="{ \"supplierName\":\"testsupplier\", \"goodsNumber\":\"3\", \"userCode\":\"999\", \"userId\":\"25918\", \"addressId\":\"774\", \"postscript\":\"ls测试\", \"shippingName\":\"货到付款\", \"howOos\":\"不要了\", \"payName\":\"weicat pay\", \"goodsId\":\"1120\", \"skuValue\":\"lstextlslsls\", \"payPrice\":\"100\", \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\", \"isPromote\":\"0\" ,\"orderNo\":\"170807183619041854999\",\"userName\":\"15011478695\",\"addTime\":\"2017-08-07 18:36:19\",\"goodsName\":\"null\",\"bussType\":\"insertOrder\"}";
+       /* String jsonInfo="{ \"supplierName\":\"testsupplier\", \"goodsNumber\":\"3\", \"userCode\":\"999\", \"userId\":\"25918\", \"addressId\":\"774\", \"postscript\":\"ls测试\", \"shippingName\":\"货到付款\", \"howOos\":\"不要了\", \"payName\":\"weicat pay\", \"goodsId\":\"1120\", \"skuValue\":\"lstextlslsls\", \"payPrice\":\"100\", \"csessionid\":\"ZTEzM2U0MDNmMWYxNGJkNTg0OGFmZWViYjlkODZlMjA=\", \"isPromote\":\"0\" ,\"orderNo\":\"170807183619041854999\",\"userName\":\"15011478695\",\"addTime\":\"2017-08-07 18:36:19\",\"goodsName\":\"null\",\"bussType\":\"insertOrder\"}";
         //String jsonInfo="eyAgCiJqc29ucnBjIjogIjIuMCIsICAKIm1ldGhvZCI6ICJxdWVyeSIsICAKInBhcmFtcyI6IHsgIAoidHlwZSI6IDEsICAKImNoYWluY29kZUlEIjp7ICAKIm5hbWUiOiIxNGI4N2IzYTFjNTZmOGNhNTZkY2VlMWEyNTBkZGRmMzYyZGQxZGZjOTc5YmY3MDAzNzg1ZjFiYTM0NDcyMGYyNmViOGE3OGJiMzU2ZGYzOTIxMjI5YjUxM2I0OTExMTNmMWJlODNhOGM1MTZkZTA0NjFhODI4NmJiNGMyM2VlMCIgIAp9LCAgCiJjdG9yTXNnIjogeyAgCiJmdW5jdGlvbiI6InF1ZXJ5T2JqcyIsICAKImFyZ3MiOlsiMTAwMSwxMDAyLDEwMDMiLCJvcmRlcixvcmRlcixwcm8iXSAgCn0sICAKInNlY3VyZUNvbnRleHQiOiAgImppbSIgIAp9LCAgCiJpZCI6IDUgIAp9ICA=";
         String a=JSONObject.parse(jsonInfo.trim()).toString();
         System.out.println(a);
@@ -255,6 +258,9 @@ public class HttpTool {
                 "    ]\n" +
                 "}");
         String fabrickInfo = doPost(" http://192.168.200.191:4000/createObj", stringBuffer.toString());
-        System.out.println("====================调用fabric接口返回为========================" + fabrickInfo);
+        System.out.println("====================调用fabric接口返回为========================" + fabrickInfo);*/
+        
+        String block_height = doGet("http://192.168.200.191:4000/channel/height");
+        System.out.println("block_height="+block_height);
     }
 }

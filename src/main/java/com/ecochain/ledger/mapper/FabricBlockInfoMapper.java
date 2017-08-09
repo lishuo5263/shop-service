@@ -13,4 +13,10 @@ public interface FabricBlockInfoMapper {
     List<FabricBlockInfo> selectAll();
 
     int updateByPrimaryKey(FabricBlockInfo record);
+    
+    List<FabricBlockInfo> getDataList10();
+    
+    FabricBlockInfo getBlockByHeight(String block_height);
+    
+    FabricBlockInfo getBlockByHash(String block_hash);
 }

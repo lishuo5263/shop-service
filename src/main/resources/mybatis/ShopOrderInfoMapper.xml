@@ -782,10 +782,10 @@
     update shop_order_info 
     <set >
       <if test="pay_time != null" >
-        pay_time = #{pay_time}
+        pay_time = #{pay_time},
       </if>
       <if test="order_status != null" >
-        order_status = #{order_status}
+        order_status = #{order_status},
       </if>
     </set>
     where order_no = #{shop_order_no}

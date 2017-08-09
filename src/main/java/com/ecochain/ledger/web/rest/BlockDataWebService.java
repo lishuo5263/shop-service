@@ -1,29 +1,43 @@
 package com.ecochain.ledger.web.rest;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import tk.mybatis.mapper.util.StringUtil;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ecochain.ledger.base.BaseWebService;
 import com.ecochain.ledger.constants.CodeConstant;
 import com.ecochain.ledger.constants.Constant;
+import com.ecochain.ledger.mapper.FabricBlockInfoMapper;
+import com.ecochain.ledger.model.FabricBlockInfo;
 import com.ecochain.ledger.model.PageData;
 import com.ecochain.ledger.service.BlockHashService;
 import com.ecochain.ledger.service.DataHashService;
 import com.ecochain.ledger.service.SysGenCodeService;
-import com.ecochain.ledger.util.*;
+import com.ecochain.ledger.util.AjaxResponse;
 import com.ecochain.ledger.util.Base64;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import tk.mybatis.mapper.util.StringUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.util.*;
+import com.ecochain.ledger.util.DateUtil;
+import com.ecochain.ledger.util.HttpTool;
+import com.ecochain.ledger.util.Logger;
 /**
  * 账户控制类
  * @author zhangchunming
@@ -41,6 +55,8 @@ public class BlockDataWebService extends BaseWebService{
     private BlockHashService blockHashService;
     @Autowired
     private DataHashService dataHashService;
+    @Autowired
+    private FabricBlockInfoMapper fabricBlockInfoMapper;
 
 
     /**
@@ -528,7 +544,7 @@ public class BlockDataWebService extends BaseWebService{
      * @param request
      * @return: AjaxResponse
      */
-    @PostMapping("/getDataList10")
+    /*@PostMapping("/getDataList10")
     @ApiOperation(nickname = "获取最新的记录数据", value = "获取最新的记录数据", notes = "获取最新的记录数据")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "rows", value = "查询条数", required = true, paramType = "query", dataType = "String")
@@ -594,12 +610,12 @@ public class BlockDataWebService extends BaseWebService{
             if(dataList10.size()>0){
                 Collections.sort(dataList10, new Comparator<PageData>(){  
                     
-                    /*  
+                      
                      * int compare(PageData o1, PageData o2) 返回一个基本类型的整型，  
                      * 返回负数表示：o1 小于o2，  
                      * 返回0 表示：o1和o2相等，  
                      * 返回正数表示：o1大于o2。  
-                     */  
+                       
                     public int compare(PageData o1, PageData o2) {  
                       
                         //按照时间降序
@@ -626,6 +642,111 @@ public class BlockDataWebService extends BaseWebService{
             ar.setMessage("网络繁忙，请稍候重试！");
         }   
         return ar;
+    }*/
+    
+    @PostMapping("/getDataList10")
+    @ApiOperation(nickname = "获取最新的记录数据", value = "获取最新的记录数据", notes = "获取最新的记录数据")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "rows", value = "查询条数", required = true, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getDataList10(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = new PageData();
+        pd = this.getPageData();
+        try {
+            if(pd.getRows()==null){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入查询条数!");
+                ar.setSuccess(false);
+                return ar;
+            }
+            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10();
+//            List<PageData> dataList10 = dataHashService.getDataList(pd.getRows());
+            List<FabricBlockInfo> removelist = new ArrayList<FabricBlockInfo>();
+            List<PageData> dataList = new ArrayList<PageData>();
+            PageData blockInfo = new PageData();
+            for(int i = 0;i<dataList10.size();i++){
+                String dataStr = dataList10.get(i).getHashData();
+                JSONObject jsonData = null;
+                try {
+                    jsonData = JSONObject.parseObject(dataStr);
+                } catch (Exception e) {
+                    System.out.println("不是一个json字符串");
+                    removelist.add(dataList10.get(i));
+                    continue;
+                }
+                if(jsonData==null){
+                    continue;
+                }
+                if("insertShopOrder".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价：2 HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
+//                    jsonData.put("describe", "提交了订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价：2 HLC,总金额："+jsonData.getString("payPrice")+" HLC，订单状态：待支付");
+                    jsonData.put("create_time", jsonData.getString("addTime"));
+                    jsonData.put("user_name", jsonData.getString("userName"));
+                }else if("payNow".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "进行了商品支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+" HLC,订单状态：已支付");
+                }else if("deliverGoods".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "将商品发货了，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
+                }else if("innerTransferLogisticss".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "编辑了物流信息，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }else if("outerTransferLogisticss".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "编辑了物流信息，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+                }else if("confirmReceipt".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "确认收货了，订单号："+jsonData.getString("shop_order_no"));
+                }else if("transferAccount".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "转HLC，订单号："+jsonData.getString("flowno")+",对方账户："+jsonData.getString("revbankaccno")+",转账金额："+jsonData.getString("coin_amnt")+" HLC");
+                }else if("currencyExchange".equals(dataList10.get(i).getFabricBussType())){
+                    jsonData.put("describe", "进行了币种兑换，订单号："+jsonData.getString("flowno")+",兑换数量："+jsonData.getString("exchange_num")+" HLC,单价："+jsonData.getString("coin_rate")+" RMB,兑换金额："+jsonData.getBigDecimal("rmb_amnt")+" RMB");
+                }else{
+                    continue;
+                }
+                logger.info("-------------------bussType="+dataList10.get(i).getFabricBussType());
+                if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
+                    jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
+                }
+                blockInfo.put("create_time", DateUtil.stampToDate1(String.valueOf(dataList10.get(i).getCreateTime().getTime())));
+                blockInfo.put("id", dataList10.get(i).getId());
+                blockInfo.put("hash", dataList10.get(i).getFabricHash());
+                blockInfo.put("data", jsonData);
+                dataList.add(blockInfo);
+            }
+//            dataList10.removeAll(removelist);
+            if(dataList.size()>0){
+                Collections.sort(dataList, new Comparator<PageData>(){  
+                    
+                    /*  
+                     * int compare(PageData o1, PageData o2) 返回一个基本类型的整型，  
+                     * 返回负数表示：o1 小于o2，  
+                     * 返回0 表示：o1和o2相等，  
+                     * 返回正数表示：o1大于o2。  
+                     */  
+                    public int compare(PageData o1, PageData o2) {  
+                      
+                        //按照时间降序
+                        if(Integer.valueOf(((JSONObject)o1.get("data")).getString("create_time")) < Integer.valueOf(((JSONObject)o2.get("data")).getString("create_time"))){  
+                            return 1;  
+                        }  
+                        if(Integer.valueOf(((JSONObject)o1.get("data")).getString("create_time")) == Integer.valueOf(((JSONObject)o2.get("data")).getString("create_time"))){  
+                            return 0;  
+                        }  
+                        return -1;  
+                    }  
+                });
+                data.put("list", dataList);
+            }else{
+                data.put("list", null);
+            }
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
     }
     
     /**
@@ -635,7 +756,7 @@ public class BlockDataWebService extends BaseWebService{
      * @param request
      * @return: AjaxResponse
      */
-    @PostMapping("/getBlockList10")
+    /*@PostMapping("/getBlockList10")
     @ApiOperation(nickname = "获取最新的区块列表", value = "获取最新的区块列表", notes = "获取最新的区块列表")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "rows", value = "查询条数", required = true, paramType = "query", dataType = "String")
@@ -666,6 +787,50 @@ public class BlockDataWebService extends BaseWebService{
             ar.setMessage("网络繁忙，请稍候重试！");
         }   
         return ar;
+    }*/
+    
+    
+    @PostMapping("/getBlockList10")
+    @ApiOperation(nickname = "获取最新的区块列表", value = "获取最新的区块列表", notes = "获取最新的区块列表")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "rows", value = "查询条数", required = true, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getBlockList10(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd  = new PageData();
+        pd = this.getPageData();
+        try {
+//            String object = (String)JedisUtil.get("blockList");
+//            List<JSONObject> blockList = (List<JSONObject>)JedisUtil.get("blockList");
+            if(pd.getRows() == null){
+                ar.setSuccess(false);
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入查询条数！");
+                return ar;
+            }
+//            List<PageData> blockList = blockHashService.getBlockList10(pd.getRows());
+            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10();
+            List<PageData> blockList = new ArrayList<PageData>();
+            for(FabricBlockInfo fabricBlockInfo:dataList10){
+                PageData block = new PageData();
+                block.put("block_create_time", fabricBlockInfo.getCreateTime());
+                block.put("block_height", fabricBlockInfo.getFabricBlockHeight());
+                block.put("trade_num", 1);
+                block.put("block_hash", fabricBlockInfo.getFabricBlockHash());
+                blockList.add(block);
+            }
+            data.put("blockList", blockList);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
     }
     
     /**
@@ -676,7 +841,7 @@ public class BlockDataWebService extends BaseWebService{
      * @return
      * @return: AjaxResponse
      */
-    @PostMapping("/getDataByBlockHash")
+    /*@PostMapping("/getDataByBlockHash")
     @ApiOperation(nickname = "根据区块hash查询交易信息", value = "根据区块hash查询交易信息", notes = "根据区块hash查询交易信息")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "hash", value = "区块hash，需带双引号", required = true, paramType = "query", dataType = "String")
@@ -772,6 +937,93 @@ public class BlockDataWebService extends BaseWebService{
             ar.setMessage("网络繁忙，请稍候重试！");
         }  
         return ar;
-    }
+    }*/
     
+    
+    @PostMapping("/getDataByBlockHash")
+    @ApiOperation(nickname = "根据区块hash查询交易信息", value = "根据区块hash查询交易信息", notes = "根据区块hash查询交易信息")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "hash", value = "区块hash，需带双引号", required = true, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getDataByBlockHash(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = new PageData();
+        pd = this.getPageData();
+        try {
+            if(StringUtil.isEmpty(pd.getString("hash"))){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入区块hash！");
+                ar.setSuccess(false);
+                return ar;
+            }
+            JSONObject blockDetail = new JSONObject();
+            JSONArray dataArray = new JSONArray();
+            FabricBlockInfo blockInfo = fabricBlockInfoMapper.getBlockByHash(pd.getString("hash"));
+            if(blockInfo == null){
+                ar.setData(null);
+                ar.setSuccess(true);
+                return ar;
+            }
+            JSONObject jsonData = JSONObject.parseObject(blockInfo.getHashData());
+            if("insertShopOrder".equals(blockInfo.getFabricBussType())){
+//              jsonData.put("describe", "提交订单，订单号："+jsonData.getString("orderNo")+"，商品名称："+jsonData.getString("goodsName")+",数量："+jsonData.getString("goodsNumber")+",单价："+jsonData.getString("payPrice")+" HLC,总金额："+new BigDecimal(String.valueOf(jsonData.get("payPrice"))).multiply(new BigDecimal(jsonData.getString("goodsNumber")))+" HLC，订单状态：待支付");
+              jsonData.put("create_time", jsonData.getString("addTime"));
+              jsonData.put("user_name", jsonData.getString("userName"));
+              jsonData.put("payPrice", "2");
+              jsonData.remove("csessionid");
+              jsonData.remove("skuInfo");
+              jsonData.remove("userName");
+              jsonData.remove("payName");
+              jsonData.remove("skuValue");
+              jsonData.remove("addTime");
+              jsonData.remove("supplierName");
+          }else if("payNow".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "ecoPay支付,订单号："+jsonData.getString("order_no")+",商品名称："+jsonData.getString("remark1")+",支付金额："+jsonData.get("order_amount")+" HLC,订单状态：已支付");
+              jsonData.remove("seeds");
+              jsonData.remove("trans_password");
+          }else if("deliverGoods".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "发货，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流公司："+jsonData.getString("logistics_name")+",订单状态：已发货");
+              jsonData.remove("createtime");
+          }else if("innerTransferLogisticss".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "国内物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+              jsonData.remove("logistics_hash");
+          }else if("outerTransferLogisticss".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "境外物流运转，订单号："+jsonData.getString("shop_order_no")+",物流单号："+jsonData.getString("logistics_no")+",物流信息："+jsonData.getString("logistics_msg"));
+              jsonData.remove("logistics_hash");
+          }else if("confirmReceipt".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "确认收货，订单号："+jsonData.getString("shop_order_no")+",卖家"+jsonData.getString("supplier_user_name")+"收到"+jsonData.getString("order_amount")+" HLC");
+          }else if("transferAccount".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "转HLC，订单号："+jsonData.getString("flowno")+",对方账户："+jsonData.getString("revbankaccno")+",转账金额："+jsonData.getString("coin_amnt")+" HLC");
+              jsonData.remove("caldate");
+          }else if("currencyExchange".equals(jsonData.getString("bussType"))){
+//              jsonData.put("describe", "币种兑换，订单号："+jsonData.getString("flowno")+",兑换数量："+jsonData.getString("exchange_num")+" HLC,单价："+jsonData.getString("coin_rate")+" RMB,"+"兑换金额："+jsonData.getBigDecimal("rmb_amnt")+" RMB");
+              jsonData.remove("caldate");
+          }
+          if(jsonData.get("create_time")!=null&&jsonData.getString("create_time").length()>10){
+              jsonData.put("create_time", DateUtil.dateToStamp(jsonData.getString("create_time")));
+          }
+              dataArray.add(jsonData);
+              JSONObject result = new JSONObject();
+              blockDetail.put("result", result.put("qtx", dataArray));
+              blockDetail.put("hash", pd.getString("hash"));
+            data.put("blockDetail", blockDetail);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }  
+        return ar;
+    }
+    public static void main(String[] args) {
+        String str = "11";
+        String base64Str = Base64.getBase64(str);
+        str = Base64.getFromBase64("MTK=");
+        System.out.println(base64Str);
+        System.out.println(str);
+    }
 }
