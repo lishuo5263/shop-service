@@ -9,12 +9,9 @@ import com.ecochain.ledger.model.*;
 import com.ecochain.ledger.service.*;
 import com.ecochain.ledger.util.Base64;
 import com.ecochain.ledger.util.DateUtil;
-import com.ecochain.ledger.util.HttpUtil;
-import com.ecochain.ledger.util.OrderGenerater;
-import com.ecochain.ledger.util.StringUtil;
+import com.ecochain.ledger.util.HttpTool;
 import com.ecochain.ledger.util.UuidUtil;
 import com.github.pagehelper.PageHelper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +21,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
 import java.math.BigDecimal;
 import java.util.*;
-
-import com.ecochain.ledger.util.HttpTool;
 
 @Component("shopOrderInfoService")
 public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
@@ -791,7 +785,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         logger.info("====================测试代码=======end=================");*/
         logger.info("====================调用fabric测试代码=======start=================");
         String uuid = UuidUtil.get32UUID();
-        String bussType="innerTransferLogisticss";
+        String bussType="confirmReceipt";
         String jsonInfo= Base64.getBase64(JSONObject.toJSONString(pd.toString()));
         String finalInfo =jsonInfo.replace("\n","").replace("\r","");
         StringBuffer stringBuffer = new StringBuffer("{\n" +
@@ -807,10 +801,21 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         String fabrickInfo = HttpTool.doPost(kql_url+"/createObj", stringBuffer.toString());
         logger.info("====================调用fabric接口返回为=========================" + fabrickInfo);
         logger.info("====================调用fabric测试代码=======end=================");
-        FabricBlockInfo fabricBlockInfo =new FabricBlockInfo();
+        String block_height_str = HttpTool.doGet(kql_url+"/channel/height");
+        String low = JSONObject.parseObject(block_height_str).getString("low");
+        int block_height = (Integer.valueOf(low)-1);
+        String block_info = HttpTool.doGet(kql_url+"/channel/blocks/"+block_height);
+        while(!block_info.contains(fabrickInfo)){
+            --block_height;
+            block_info = HttpTool.doGet(kql_url+"/channel/blocks/"+block_height);
+        }
+        JSONObject block_info_obj = JSONObject.parseObject(block_info);
+        FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
+        fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
+        fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
         fabricBlockInfo.setFabricUuid(uuid); //java
-        fabricBlockInfo.setHashData(jsonInfo);
+        fabricBlockInfo.setHashData(JSONObject.toJSONString(pd.toString()));
         fabricBlockInfo.setFabricBussType(bussType);
         fabricBlockInfo.setCreateTime(new Date());
         fabricBlockInfoMapper.insert(fabricBlockInfo);
