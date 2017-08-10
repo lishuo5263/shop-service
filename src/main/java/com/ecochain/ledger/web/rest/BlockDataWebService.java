@@ -116,7 +116,7 @@ public class BlockDataWebService extends BaseWebService{
      * @param request
      * @return: AjaxResponse
      */
-    @PostMapping("/getBlockList")
+    /*@PostMapping("/getBlockList")
     @ApiOperation(nickname = "获取最新的区块数据", value = "获取最新的区块数据", notes = "获取最新的区块数据")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "rows", value = "查询区块个数", required = false, paramType = "query", dataType = "String")
@@ -156,8 +156,43 @@ public class BlockDataWebService extends BaseWebService{
             ar.setMessage("网络繁忙，请稍候重试！");
         }   
         return ar;
-    }
+    }*/
     
+    
+    @PostMapping("/getBlockList")
+    @ApiOperation(nickname = "获取最新的区块数据", value = "获取最新的区块数据", notes = "获取最新的区块数据")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "rows", value = "查询区块个数", required = false, paramType = "query", dataType = "String")
+    })
+    public AjaxResponse getBlockList(HttpServletRequest request){
+        AjaxResponse ar = new AjaxResponse();
+        Map<String,Object> data = new HashMap<String, Object>();
+        PageData pd = new PageData();
+        pd = this.getPageData();
+        try {
+            JSONObject blockData = new JSONObject();
+            JSONArray array = new JSONArray();
+            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10();
+            for(FabricBlockInfo fabricBlockInfo:dataList10){
+                JSONObject blockJson = new JSONObject();
+                blockJson.put("generateTime", DateUtil.stampToDate1(String.valueOf(fabricBlockInfo.getCreateTime().getTime())));
+                blockJson.put("blockHeight", fabricBlockInfo.getFabricBlockHeight());
+                blockJson.put("blockHash", fabricBlockInfo.getFabricBlockHash());
+                array.add(blockJson);
+            }
+            blockData.put("result", array);
+            data.put("list", blockData);
+            ar.setData(data);
+            ar.setSuccess(true);
+            ar.setMessage("查询成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ar.setSuccess(false);
+            ar.setErrorCode(CodeConstant.SYS_ERROR);
+            ar.setMessage("网络繁忙，请稍候重试！");
+        }   
+        return ar;
+    }
     /**
      * @describe:按日期查询区块数据
      * @author: zhangchunming
