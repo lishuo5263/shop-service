@@ -813,7 +813,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         FabricBlockInfo fabricBlockInfo = new FabricBlockInfo();
         fabricBlockInfo.setFabricBlockHash(block_info_obj.getJSONObject("header").getString("data_hash"));
         fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
-        fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
+        fabricBlockInfo.setFabricHash(fabrickInfo); //fabric uuid
         fabricBlockInfo.setFabricUuid(uuid); //java
         fabricBlockInfo.setHashData(JSON.toJSONString(pd));
         fabricBlockInfo.setFabricBussType(bussType);
