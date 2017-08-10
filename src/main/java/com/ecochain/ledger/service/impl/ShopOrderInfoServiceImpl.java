@@ -815,7 +815,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         fabricBlockInfo.setFabricBlockHeight(String.valueOf(block_height));
         fabricBlockInfo.setFabricHash(Base64.getBase64(fabrickInfo)); //fabric uuid
         fabricBlockInfo.setFabricUuid(uuid); //java
-        fabricBlockInfo.setHashData(JSONObject.toJSONString(pd.toString()));
+        fabricBlockInfo.setHashData(JSON.toJSONString(pd));
         fabricBlockInfo.setFabricBussType(bussType);
         fabricBlockInfo.setCreateTime(new Date());
         fabricBlockInfoMapper.insert(fabricBlockInfo);
@@ -826,7 +826,7 @@ public class ShopOrderInfoServiceImpl implements ShopOrderInfoService {
         pd.put("flag","notUpdate");
         pd.put("logistics_no", infoMap.get("logistics_no"));
         pd.put("logistics_msg", "买家:"+pd.getString("user_name")+"已确认收货");
-        pd.put("logistics_detail_hash", Base64.getBase64(fabrickInfo));
+        pd.put("logistics_detail_hash", fabrickInfo);
         if(shopOrderLogisticsDetailService.transferLogisticsWithOutBlockChain(pd, Constant.VERSION_NO)){
             logger.info("====================确认收货新加物流信息=======end=================");
         }
