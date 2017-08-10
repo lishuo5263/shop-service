@@ -146,8 +146,8 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <select id="getDataList10" resultMap="BaseResultMap">
-    select * from fabric_block_info order by id desc limit 0,10
+  <select id="getDataList10" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+    select * from fabric_block_info order by id desc  limit 0,#{rows} 
   </select>
   <select id="getBlockByHeight" parameterType="java.lang.String" resultMap="BaseResultMap">
     select * from fabric_block_info where fabric_block_height = #{block_height}

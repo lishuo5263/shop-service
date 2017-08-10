@@ -170,9 +170,15 @@ public class BlockDataWebService extends BaseWebService{
         PageData pd = new PageData();
         pd = this.getPageData();
         try {
+            if(pd.getRows()==null){
+                ar.setErrorCode(CodeConstant.PARAM_ERROR);
+                ar.setMessage("请输入查询条数!");
+                ar.setSuccess(false);
+                return ar;
+            }
             JSONObject blockData = new JSONObject();
             JSONArray array = new JSONArray();
-            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10();
+            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10(pd.getRows());
             for(FabricBlockInfo fabricBlockInfo:dataList10){
                 JSONObject blockJson = new JSONObject();
                 blockJson.put("generateTime", DateUtil.stampToDate1(String.valueOf(fabricBlockInfo.getCreateTime().getTime())));
@@ -759,7 +765,7 @@ public class BlockDataWebService extends BaseWebService{
                 ar.setSuccess(false);
                 return ar;
             }
-            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10();
+            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10(pd.getRows());
 //            List<PageData> dataList10 = dataHashService.getDataList(pd.getRows());
             List<FabricBlockInfo> removelist = new ArrayList<FabricBlockInfo>();
             List<PageData> dataList = new ArrayList<PageData>();
@@ -908,7 +914,7 @@ public class BlockDataWebService extends BaseWebService{
                 return ar;
             }
 //            List<PageData> blockList = blockHashService.getBlockList10(pd.getRows());
-            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10();
+            List<FabricBlockInfo> dataList10 = fabricBlockInfoMapper.getDataList10(pd.getRows());
             List<PageData> blockList = new ArrayList<PageData>();
             for(FabricBlockInfo fabricBlockInfo:dataList10){
                 PageData block = new PageData();
